@@ -1,0 +1,41 @@
+section,check,severity,status,detail
+A,raw shape 8378x195,critical,pass,"actual (8378, 195)"
+A,unscaled shape 8378x195,critical,pass,"actual (8378, 195)"
+A,column set raw vs unscaled,high,pass,raw=195 unscaled=195
+A,unscaled preserves `iid` vs raw,critical,pass,match
+A,unscaled preserves `pid` vs raw,critical,pass,match
+A,unscaled preserves `gender` vs raw,critical,pass,match
+A,unscaled preserves `wave` vs raw,critical,pass,match
+A,unscaled preserves `dec` vs raw,critical,pass,match
+A,unscaled preserves `dec_o` vs raw,critical,pass,match
+A,unscaled preserves `match` vs raw,critical,pass,match
+A,unscaled preserves `condtn` vs raw,critical,pass,match
+A,unscaled preserves `order` vs raw,critical,pass,match
+A,unscaled preserves `round` vs raw,critical,pass,match
+B,replicated pipeline matches clean_unscaled,critical,pass,all numeric cols match within tolerance
+B,"met only {1,2,NA}",medium,pass,"unique non-NA: [np.float64(1.0), np.float64(2.0)]"
+B,"met_o only {1,2,NA}",medium,pass,"unique non-NA: [np.float64(1.0), np.float64(2.0)]"
+B,zero ratings in raw → NA in unscaled (documented policy),medium,pass,raw zero cells across six attrs: 100; unscaled NA cells: 3004
+B,pref group *1_1 rescaled sums≈100,high,pass,n=8257 mean sum=100.0000
+B,pref group *4_1 rescaled sums≈100,high,pass,n=6467 mean sum=100.0000
+B,pref group *2_1 rescaled sums≈100,high,pass,n=8289 mean sum=100.0000
+B,pref group *1_2 rescaled sums≈100,high,pass,n=7445 mean sum=100.0000
+B,pref group *7_2 rescaled sums≈100,high,pass,n=1955 mean sum=100.0000
+B,pref group *pf_o rescaled sums≈100,high,pass,n=8249 mean sum=100.0000
+C,*1_1 stated prefs sum to 100 (complete rows),critical,pass,complete rows=8257/8378 (98.6%)
+C,*1_1 constant within iid,critical,pass,all six attrs constant per person
+C,*7_2 lookback prefs rescaled to 100,high,pass,complete rows=1955; mean sum=100.00
+C,completeness attr,medium,pass,97.5% non-missing
+C,completeness sinc,medium,pass,96.6% non-missing
+C,completeness intel,medium,pass,96.4% non-missing
+C,completeness fun,medium,pass,95.7% non-missing
+C,completeness amb,medium,pass,91.4% non-missing
+C,completeness shar,medium,pass,86.6% non-missing
+C,match == (dec & dec_o),critical,pass,mismatches=0
+C,yes-rate sanity by gender,low,pass,"female yes=36.5%, male yes=47.4% (expect ~37% / ~47%)"
+D,legacy clean.csv not present,high,pass,removed
+D,stated prefs on 0–100 scale in canonical file,high,pass,attr1_1 mean=22.37 std=12.42 (n=8257)
+D,canonical file for modeling is unscaled only,critical,pass,Use data/processed/clean_unscaled.csv; standardise ratings inside model notebooks only
+E,cleaning module uses repo paths,medium,pass,src/cleaning.py uses RAW_PATH and CLEAN_PATH via project_root()
+E,no row deletion or imputation,high,pass,rows raw=8378 unscaled=8378
+E,*7_2 included in preference rescale groups,high,pass,"PREF_SUFFIXES=['1_1', '4_1', '2_1', '1_2', '7_2']"

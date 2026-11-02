@@ -26,11 +26,14 @@ Do **not** modify the raw CSV. Load with `encoding="cp1252"`.
 
 | # | Notebook | Owner role | Depends on |
 |---|----------|------------|------------|
+| 0 | `notebooks/00_audit_cleaning.ipynb` | Any | raw + processed CSVs |
 | 1 | `notebooks/01_cleaning.ipynb` | Data lead | raw CSV |
-| 2 | `notebooks/02_core_model.ipynb` | Core model | `data/processed/clean.csv` |
-| 3 | `notebooks/03_ml.ipynb` | ML model | clean.csv |
-| 4 | `notebooks/04_robustness.ipynb` | Robustness | clean.csv |
-| 5 | `notebooks/05_customer_value.ipynb` | Implications | clean.csv + model outputs |
+| 2 | `notebooks/02_core_model.ipynb` | Core model | `data/processed/clean_unscaled.csv` |
+| 3 | `notebooks/03_ml.ipynb` | ML model | clean_unscaled.csv |
+| 4 | `notebooks/04_robustness.ipynb` | Robustness | clean_unscaled.csv |
+| 5 | `notebooks/05_customer_value.ipynb` | Implications | clean_unscaled.csv + model outputs |
+
+Run `01_cleaning.ipynb` (or `python -m src.cleaning`) after cloning if `clean_unscaled.csv` is not in the repo.
 
 Run each notebook **top to bottom from a fresh kernel**. Prefer starting Jupyter from the repo root so relative paths resolve.
 

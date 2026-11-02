@@ -224,8 +224,9 @@ Conditional logit, standardised ratings, coefficients clipped at 0 and rescaled 
 ├── requirements.txt
 ├── data/
 │   ├── raw/Speed_Dating_Data.csv     # never modified
-│   └── processed/clean.csv           # output of 01_cleaning
+│   └── processed/clean_unscaled.csv  # output of 01_cleaning (interpretable scales)
 ├── notebooks/
+│   ├── 00_audit_cleaning.ipynb
 │   ├── 01_cleaning.ipynb
 │   ├── 02_core_model.ipynb
 │   ├── 03_ml.ipynb
