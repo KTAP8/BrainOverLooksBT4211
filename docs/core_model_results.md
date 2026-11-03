@@ -83,4 +83,3 @@ From the repo root, install `requirements.txt`, then run `python -m src.core_mod
 - [Original data key](https://web.mit.edu/17.871/www/2009/speed_dating_codebook.pdf).
 - [Statsmodels ConditionalLogit documentation](https://www.statsmodels.org/stable/generated/statsmodels.discrete.conditional_models.ConditionalLogit.html).
 - Fisman, Iyengar, Kamenica & Simonson (2006), *Gender Differences in Mate Selection: Evidence From a Speed Dating Experiment*, QJE 121(2), 673–697.
-- Codex assisted with implementation, execution, numerical checks, charts and explanatory drafts. See `AI_USAGE.md`. Team review is not claimed to have occurred.
