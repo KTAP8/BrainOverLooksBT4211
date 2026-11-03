@@ -37,6 +37,17 @@ Run `01_cleaning.ipynb` (or `python -m src.cleaning`) after cloning if `clean_un
 
 Run each notebook **top to bottom from a fresh kernel**. Prefer starting Jupyter from the repo root so relative paths resolve.
 
+## Part 3: core model
+
+Open [`notebooks/02_core_model.ipynb`](notebooks/02_core_model.ipynb) to view the executed results or rerun from a fresh kernel. It works from the repository root or `notebooks/`. The same analysis can be run from the root with:
+
+```bash
+python -m src.core_model
+python -m unittest discover -s tests -v
+```
+
+The main chart is [`outputs/figures/core_model_stated_vs_revealed.png`](outputs/figures/core_model_stated_vs_revealed.png). See the [results and method](docs/core_model_results.md) and [presentation notes](docs/core_model_presentation_notes.md). Core-model tables use the `core_model_` prefix. The first run compiles the exact likelihood; 1,000 person-bootstrap draws per gender take a few minutes. Runtime versions are recorded in the diagnostics JSON.
+
 ## Shared code
 
 Constants, loaders, and plotting helpers live in `src/`:

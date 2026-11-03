@@ -178,24 +178,31 @@ For each person, rank the partners they met using (a) stated weights and (b) rev
 
 ---
 
-## 6. Preliminary results (to be replaced by final numbers)
+## 6. Core-model results (updated 2026-11-03)
 
-Conditional logit, standardised ratings, coefficients clipped at 0 and rescaled to 100. **Preliminary, no CIs yet.**
+Conditional logit with standardized ratings, negative coefficients clipped to zero for importance, and 1,000 participant-bootstrap draws per gender (`SEED = 42`). Full details and limitations: [`docs/core_model_results.md`](docs/core_model_results.md).
 
-| Attribute        | Women stated | Women revealed | Men stated | Men revealed |
-| ---------------- | ------------ | -------------- | ---------- | ------------ |
-| Attractive       | 18           | **38**         | 27         | **48**       |
-| Sincere          | 18           | 8              | 16         | 3            |
-| Intelligent      | 21           | 10             | 19         | 6            |
-| Fun              | 17           | 19             | 18         | 24           |
-| Ambitious        | 13           | 1              | 9          | 0            |
-| Shared interests | 13           | 23             | 11         | 19           |
+| Gender | Attribute | Stated | Revealed | Gap (pp) | 95% gap interval |
+|---|---|---:|---:|---:|---|
+| Women | Attractive | 17.7 | 37.9 | +20.2 | [15.3, 24.8] |
+| Women | Sincere | 18.3 | 9.2 | -9.1 | [-14.4, -4.0] |
+| Women | Intelligent | 21.2 | 9.4 | -11.8 | [-16.5, -7.1] |
+| Women | Fun | 17.5 | 19.8 | +2.3 | [-3.0, 7.6] |
+| Women | Ambitious | 12.7 | 1.4 | -11.4 | [-13.3, -7.2] |
+| Women | Shared interests | 12.6 | 22.4 | +9.8 | [5.3, 14.0] |
+| Men | Attractive | 26.7 | 47.4 | +20.7 | [15.6, 25.3] |
+| Men | Sincere | 16.6 | 2.2 | -14.4 | [-17.0, -9.8] |
+| Men | Intelligent | 19.5 | 6.0 | -13.5 | [-17.8, -9.8] |
+| Men | Fun | 17.2 | 24.0 | +6.8 | [2.6, 11.0] |
+| Men | Ambitious | 8.8 | 0.0 | -8.8 | [-9.5, -6.0] |
+| Men | Shared interests | 11.2 | 20.4 | +9.2 | [4.8, 13.6] |
 
-- Women: 3,457 decisions, 268 people used. Men: 3,583 decisions, 269 people used.
-- Ambition not significant for either gender (p ≈ 0.6). Sincerity not significant for men (p ≈ 0.21).
-- Other facts: men say yes more often (47% vs 37%).
+- Retained sample: women **3,000 decisions / 223 people**; men **3,222 decisions / 229 people**. These supersede the earlier preliminary counts. Complete-case filtering is followed by removal of 75 participants with no remaining yes/no variation.
+- Attractiveness has a positive stated–revealed gap in both groups. All pointwise 95% gap intervals exclude zero except fun for women. Intervals are exploratory and not adjusted for multiple comparisons.
+- Importance is a standardized/clipped coefficient index, not a causal effect or a literal true preference percentage. The men's ambition weight is clipped to zero; this does not establish that ambition has no effect. Signed coefficients and their intervals remain in the results CSV.
+- All 2,000 bootstrap fits converged. The notebook runs from a fresh kernel and retains its executed outputs.
 
-**Headline (provisional):** attractiveness counts roughly twice as much as people say; intelligence and sincerity count about half or less; ambition has no measurable effect.
+**Headline:** attractiveness receives substantially more relative weight in choices than in stated preferences in this retained sample.
 
 ---
 

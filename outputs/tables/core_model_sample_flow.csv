@@ -1,0 +1,3 @@
+gender,raw_rows,raw_people,complete_rows,complete_people,excluded_missing_rows,excluded_constant_choice_people,excluded_constant_choice_rows,model_rows,model_people,model_yes_rate
+Women,4184,274,3350,262,834,39,350,3000,223,0.39566666666666667
+Men,4194,277,3518,265,676,36,296,3222,229,0.4798261949099938
