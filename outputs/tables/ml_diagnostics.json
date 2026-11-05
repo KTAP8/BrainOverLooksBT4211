@@ -1,0 +1,27 @@
+{
+  "seed": 42,
+  "cv": "GroupKFold by iid",
+  "n_splits": 5,
+  "gbm": "sklearn HistGradientBoostingClassifier",
+  "gbm_note": "PROJECT_CONTEXT names XGBoost/LightGBM; both need libomp, sklearn does not",
+  "standardisation": "Part 3 within-gender means/SDs from core_model_scaling.csv",
+  "sample": "union of Part 3 retained samples; asserted against core_model_sample_flow.csv",
+  "n_rows": 6222,
+  "n_people": 452,
+  "python": "3.9.6",
+  "numpy": "2.0.2",
+  "pandas": "2.3.3",
+  "sklearn": "1.6.1",
+  "threshold": {
+    "log_loss_linear": 0.5475314092814115,
+    "log_loss_dummies": 0.546650868954744,
+    "improvement": 0.0008805403266675116,
+    "n_fractional_ratings": 12
+  },
+  "interactions": {
+    "auc_main_effects": 0.8220665785659318,
+    "auc_with_interactions": 0.8219505343469272,
+    "n_interaction_terms": 15,
+    "change": -0.00011604421900457407
+  }
+}

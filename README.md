@@ -48,6 +48,23 @@ python -m unittest discover -s tests -v
 
 The main chart is [`outputs/figures/core_model_stated_vs_revealed.png`](outputs/figures/core_model_stated_vs_revealed.png). See the [results and method](docs/core_model_results.md) and [presentation notes](docs/core_model_presentation_notes.md). Core-model tables use the `core_model_` prefix. The first run compiles the exact likelihood; 1,000 person-bootstrap draws per gender take a few minutes. Runtime versions are recorded in the diagnostics JSON.
 
+## Part 4: ML cross-check
+
+Open [`notebooks/03_ml.ipynb`](notebooks/03_ml.ipynb) to view the executed results, or rerun from the repository root:
+
+```bash
+python -m src.ml_model
+python -m unittest discover -s tests -v
+```
+
+This section tries to break Part 3 and reports that it could not. A gradient booster given the same six ratings, and free to use thresholds and interactions, **loses in all six configurations** (AUC margin −0.006 to −0.023); there is no dealbreaker cut-off and no useful interaction, so preferences here are compensatory. What does move is the coefficients: dropping the person fixed effects attenuates all twelve estimates, four of them below zero, which the agreed clip-at-0 importance rule then reports as `0.00`.
+
+It runs on the union of Part 3's two retained samples (6,222 decisions, 452 participants) and asserts both the sample and the standardisation against `core_model_sample_flow.csv` and `core_model_scaling.csv`, so this section cannot silently analyse different data from Part 3. ML tables use the `ml_` prefix.
+
+**Deviation from [`PROJECT_CONTEXT.md`](PROJECT_CONTEXT.md) §5:** the booster is scikit-learn's `HistGradientBoostingClassifier` and importance is permutation importance, not XGBoost and SHAP. Both boosters need an OpenMP runtime (`libomp`) that would not load on the machine this was built on, and scikit-learn is already a dependency. `requirements.txt` is unchanged; replacing `make_gbm` is the only edit needed if you have XGBoost working.
+
+See the [results and method](docs/ml_results.md). Main figures: [`ml_fixed_effect_shift.png`](outputs/figures/ml_fixed_effect_shift.png), [`ml_importance_comparison.png`](outputs/figures/ml_importance_comparison.png), [`ml_attractiveness_curve.png`](outputs/figures/ml_attractiveness_curve.png).
+
 ## Shared code
 
 Constants, loaders, and plotting helpers live in `src/`:
