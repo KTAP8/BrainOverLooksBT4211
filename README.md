@@ -37,6 +37,10 @@ Run `01_cleaning.ipynb` (or `python -m src.cleaning`) after cloning if `clean_un
 
 Run each notebook **top to bottom from a fresh kernel**. Prefer starting Jupyter from the repo root so relative paths resolve.
 
+**Minimum path for stated/revealed + customer value:** `01_cleaning` → `02_core_model` → `05_customer_value` (or `python -m src.cleaning`, `python -m src.core_model`, `python -m src.customer_value` from repo root).
+
+Person 6 slide drafts: [`docs/person6_slides_8_10.md`](docs/person6_slides_8_10.md), [`docs/slide_style_guide.md`](docs/slide_style_guide.md).
+
 ## Part 3: core model
 
 Open [`notebooks/02_core_model.ipynb`](notebooks/02_core_model.ipynb) to view the executed results or rerun from a fresh kernel. It works from the repository root or `notebooks/`. The same analysis can be run from the root with:
