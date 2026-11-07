@@ -1,0 +1,7 @@
+measure,value,ci_low,ci_high,p
+AUC: guess vs partner's real answer,0.584855,0.066941,0.102284,0.001
+AUC: guess vs own decision,0.678875,0.156401,0.201508,0.001
+AUC gap: own decision minus partner's answer,0.094019,0.064655,0.126788,0.001
+Brier score of guesses,0.266853,0.260305,0.273889,0.001
+Brier score of predicting the average,0.244643,0.240996,0.247195,0.001
+Brier gap: guesses minus average (positive is worse),0.02221,0.014934,0.030809,0.001

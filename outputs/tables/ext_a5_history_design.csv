@@ -1,0 +1,13 @@
+top_k,comparison,metric,first,second,lift_pp,ci_low,ci_high,p
+1,Both likely to say yes minus Stated weights,Match rate,0.295826,0.245009,5.08167,1.633394,8.348457,0.007
+1,Both likely to say yes minus Stated weights,Yes rate,0.544465,0.633394,-8.892922,-13.067151,-4.900181,0.001
+1,Revealed weights minus Stated weights,Match rate,0.232305,0.245009,-1.270417,-4.178766,1.451906,0.409
+1,Revealed weights minus Stated weights,Yes rate,0.637024,0.633394,0.362976,-2.540835,3.085299,0.863
+2,Both likely to say yes minus Stated weights,Match rate,0.261343,0.227768,3.357532,1.270417,5.444646,0.003
+2,Both likely to say yes minus Stated weights,Yes rate,0.53176,0.584392,-5.263158,-7.894737,-2.722323,0.001
+2,Revealed weights minus Stated weights,Match rate,0.216878,0.227768,-1.088929,-2.633848,0.362976,0.177
+2,Revealed weights minus Stated weights,Yes rate,0.579855,0.584392,-0.453721,-2.268603,1.451906,0.659
+3,Both likely to say yes minus Stated weights,Match rate,0.236842,0.212039,2.480339,1.209921,3.871748,0.001
+3,Both likely to say yes minus Stated weights,Yes rate,0.50363,0.539322,-3.569268,-5.323654,-1.875378,0.001
+3,Revealed weights minus Stated weights,Match rate,0.209014,0.212039,-0.30248,-1.330913,0.725953,0.579
+3,Revealed weights minus Stated weights,Yes rate,0.538717,0.539322,-0.060496,-1.453418,1.270417,0.915

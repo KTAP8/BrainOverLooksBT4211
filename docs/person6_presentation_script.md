@@ -32,13 +32,15 @@ If someone asks what would show an even bigger gap: a full profile catalog inste
 
 ## Slide 9 (~1 min)
 
-"So what should marketers do?
+"So what should marketers do—and how does this translate to a real app?
 
-For researchers: treat hundred-point surveys as hypotheses. Validate with choices. Here, sincerity and intelligence are overstated in words; appearance is understated.
+In the data, the decision is already first contact: my yes versus mutual match. We are not modelling second dates.
 
-For product teams: don't optimize copy and profile fields from surveys alone. Test UX that reflects what drives choices—photos, fun, shared interests.
+Our slides eight a and b are the infinite-feed problem: who is number one in my queue? Use revealed-style ranking when the KPI is whether I say yes to what you show first—especially for users whose stated and revealed number one disagree.
 
-For platforms: pilot re-ranking with revealed-style weights and measure yes and match rates as leading indicators of retention. We're not claiming manipulation—just better surfacing—with the caveat that yes isn't long-term fit."
+The extension on limited recommendations is a different product move: one curated partner each, optimise mutual yes—not second dates, but both liking each other on the first assigned introduction. There, coordination beats random; bilateral optimisation tends to win over ranking each person alone. Revealed can still beat stated for my top pick while mutual match looks similar across rules in the replay.
+
+For researchers: surveys are hypotheses. For product: don't build copy only from stated weights. For platforms: pick the KPI—engagement on my feed versus mutual matches on scarce slots—then pilot the matching policy that fits. Test yes, match, and retention in production; our numbers are historical replays."
 
 ## Slide 10 (~30 sec)
 

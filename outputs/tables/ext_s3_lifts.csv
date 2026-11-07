@@ -1,0 +1,11 @@
+slots,comparison,lift_pp,events,ci_low,ci_high,p
+1,optimised minus random,6.316888,21,2.478345,10.321461,0.003
+1,stated minus random,4.398358,21,-0.613358,8.84801,0.095
+1,revealed minus random,2.217652,21,-1.131435,5.908399,0.185
+1,optimised minus stated,1.91853,21,-4.435758,8.802634,0.531
+1,revealed minus stated,-2.180706,21,-7.627872,3.372928,0.451
+2,optimised minus random,5.045543,21,3.24012,6.796734,0.001
+2,stated minus random,4.380792,21,2.017725,7.267983,0.001
+2,revealed minus random,4.640798,21,2.163289,7.015884,0.001
+2,optimised minus stated,0.664751,21,-2.320192,3.295933,0.627
+2,revealed minus stated,0.260006,21,-3.129483,3.645015,0.859

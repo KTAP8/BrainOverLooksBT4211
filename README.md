@@ -30,8 +30,9 @@ Do **not** modify the raw CSV. Load with `encoding="cp1252"`.
 | 1 | `notebooks/01_cleaning.ipynb` | Data lead | raw CSV |
 | 2 | `notebooks/02_core_model.ipynb` | Core model | `data/processed/clean_unscaled.csv` |
 | 3 | `notebooks/03_ml.ipynb` | ML model | clean_unscaled.csv |
-| 4 | `notebooks/04_robustness.ipynb` | Robustness | clean_unscaled.csv |
+| 4 | `notebooks/04_robustness_extensions updated.ipynb` | Robustness | clean_unscaled.csv |
 | 5 | `notebooks/05_customer_value.ipynb` | Implications | clean_unscaled.csv + model outputs |
+| 6 | `notebooks/06_extended_analysis.ipynb` | Extensions (optional menu) | clean_unscaled.csv + Part 3 outputs |
 
 Run `01_cleaning.ipynb` (or `python -m src.cleaning`) after cloning if `clean_unscaled.csv` is not in the repo.
 
@@ -68,6 +69,18 @@ It runs on the union of Part 3's two retained samples (6,222 decisions, 452 part
 **Deviation from [`PROJECT_CONTEXT.md`](PROJECT_CONTEXT.md) §5:** the booster is scikit-learn's `HistGradientBoostingClassifier` and importance is permutation importance, not XGBoost and SHAP. Both boosters need an OpenMP runtime (`libomp`) that would not load on the machine this was built on, and scikit-learn is already a dependency. `requirements.txt` is unchanged; replacing `make_gbm` is the only edit needed if you have XGBoost working.
 
 See the [results and method](docs/ml_results.md). Main figures: [`ml_fixed_effect_shift.png`](outputs/figures/ml_fixed_effect_shift.png), [`ml_importance_comparison.png`](outputs/figures/ml_importance_comparison.png), [`ml_attractiveness_curve.png`](outputs/figures/ml_attractiveness_curve.png).
+
+## Extended analyses
+
+A menu of extra analyses for the team to choose from: better survey questions, survey vs behaviour, market beliefs, mutual-match ranking, a market simulator and further robustness checks. Start with the [findings and how-to report](docs/extended_analysis_report.md).
+
+```bash
+source .venv/bin/activate
+python -m src.extended_analysis
+python -m unittest discover -s tests -v
+```
+
+The run takes under 4 minutes and writes only `ext_`-prefixed tables and figures. `outputs/tables/ext_summary.csv` lists every finding. Open [`notebooks/06_extended_analysis.ipynb`](notebooks/06_extended_analysis.ipynb) with `.venv` activated, or the kernel can pick up a global Python.
 
 ## Shared code
 

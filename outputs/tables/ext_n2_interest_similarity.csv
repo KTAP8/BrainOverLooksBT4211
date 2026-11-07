@@ -1,0 +1,5 @@
+outcome,model,similarity_pp_per_sd,similarity_p,interaction_pp,interaction_p,people
+dec,No ratings,1.877314,0.005507,0.410963,0.541384,452
+dec,With ratings,0.351204,0.521788,0.391929,0.466737,452
+match,No ratings,1.130388,0.036169,0.240177,0.648731,452
+match,With ratings,0.353139,0.480529,0.258677,0.614491,452

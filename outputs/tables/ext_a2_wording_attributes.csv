@@ -1,0 +1,61 @@
+gender,question,suffix,attribute,answer,actual,gap,gap_ci_low,gap_ci_high
+Women,What I look for (sign-up),1_1,Attractive,18.437976,35.845185,17.407209,12.010295,22.766288
+Women,What I look for (sign-up),1_1,Sincere,18.889128,6.609902,-12.279226,-18.550689,-6.815034
+Women,What I look for (sign-up),1_1,Intelligent,21.362813,9.753502,-11.609311,-16.842132,-6.034708
+Women,What I look for (sign-up),1_1,Fun,17.149218,19.87429,2.725072,-3.730805,8.767551
+Women,What I look for (sign-up),1_1,Ambitious,11.508606,2.219266,-9.289339,-12.090615,-4.406156
+Women,What I look for (sign-up),1_1,Shared interests,12.65226,25.697855,13.045595,7.913269,18.121726
+Women,What others of my gender look for,4_1,Attractive,28.981081,35.845185,6.864104,1.481124,12.022174
+Women,What others of my gender look for,4_1,Sincere,12.471122,6.609902,-5.86122,-12.363528,0.236776
+Women,What others of my gender look for,4_1,Intelligent,14.948743,9.753502,-5.195241,-10.267985,0.482834
+Women,What others of my gender look for,4_1,Fun,17.465626,19.87429,2.408664,-3.861224,8.508879
+Women,What others of my gender look for,4_1,Ambitious,13.4216,2.219266,-11.202334,-14.379294,-6.050956
+Women,What others of my gender look for,4_1,Shared interests,12.711829,25.697855,12.986026,7.820115,18.16072
+Women,What the opposite sex looks for,2_1,Attractive,38.060666,43.526885,5.466219,-1.856066,11.564628
+Women,What the opposite sex looks for,2_1,Sincere,10.348157,3.025467,-7.32269,-10.984423,-1.551622
+Women,What the opposite sex looks for,2_1,Intelligent,11.775803,5.711749,-6.064054,-11.672654,-0.485212
+Women,What the opposite sex looks for,2_1,Fun,19.310515,24.301458,4.990943,-0.44071,10.204088
+Women,What the opposite sex looks for,2_1,Ambitious,8.232782,0.184111,-8.048671,-8.988451,-2.438287
+Women,What the opposite sex looks for,2_1,Shared interests,12.272077,23.25033,10.978252,4.47907,15.818444
+Women,What I look for (day after),1_2,Attractive,21.592237,35.845185,14.252948,8.674176,19.720667
+Women,What I look for (day after),1_2,Sincere,17.377723,6.609902,-10.767821,-16.810791,-5.415471
+Women,What I look for (day after),1_2,Intelligent,19.904074,9.753502,-10.150572,-15.346549,-4.387445
+Women,What I look for (day after),1_2,Fun,16.924497,19.87429,2.949793,-3.155983,8.887639
+Women,What I look for (day after),1_2,Ambitious,10.606247,2.219266,-8.38698,-11.197672,-3.313918
+Women,What I look for (day after),1_2,Shared interests,13.595222,25.697855,12.102632,6.833073,17.080301
+Women,What I look for (3-4 weeks later),1_3,Attractive,22.965278,35.845185,12.879907,6.383969,19.463732
+Women,What I look for (3-4 weeks later),1_3,Sincere,17.946181,6.609902,-11.336279,-17.845622,-6.102452
+Women,What I look for (3-4 weeks later),1_3,Intelligent,19.885417,9.753502,-10.131915,-15.539072,-4.476566
+Women,What I look for (3-4 weeks later),1_3,Fun,14.555556,19.87429,5.318735,-1.006732,11.344099
+Women,What I look for (3-4 weeks later),1_3,Ambitious,10.972222,2.219266,-8.752956,-11.79499,-4.089272
+Women,What I look for (3-4 weeks later),1_3,Shared interests,13.675347,25.697855,12.022507,6.699561,17.272694
+Men,What I look for (sign-up),1_1,Attractive,28.452412,43.526885,15.074473,8.618959,20.957595
+Men,What I look for (sign-up),1_1,Sincere,16.446858,3.025467,-13.421391,-16.888181,-7.787473
+Men,What I look for (sign-up),1_1,Intelligent,19.340575,5.711749,-13.628826,-19.289632,-8.052852
+Men,What I look for (sign-up),1_1,Fun,17.240006,24.301458,7.061451,1.828815,12.462101
+Men,What I look for (sign-up),1_1,Ambitious,8.051243,0.184111,-7.867132,-8.78646,-2.226926
+Men,What I look for (sign-up),1_1,Shared interests,10.468904,23.25033,12.781425,6.364261,17.476016
+Men,What others of my gender look for,4_1,Attractive,34.833005,43.526885,8.69388,1.772003,14.878465
+Men,What others of my gender look for,4_1,Sincere,12.233182,3.025467,-9.207715,-12.908137,-3.339472
+Men,What others of my gender look for,4_1,Intelligent,13.933806,5.711749,-8.222057,-13.72861,-2.774366
+Men,What others of my gender look for,4_1,Fun,18.598699,24.301458,5.702759,0.587795,11.010446
+Men,What others of my gender look for,4_1,Ambitious,8.39855,0.184111,-8.214439,-9.278185,-2.551017
+Men,What others of my gender look for,4_1,Shared interests,12.002757,23.25033,11.247572,5.09561,16.34645
+Men,What the opposite sex looks for,2_1,Attractive,26.384282,35.845185,9.460903,3.744801,15.103582
+Men,What the opposite sex looks for,2_1,Sincere,14.539951,6.609902,-7.930049,-14.335721,-2.172157
+Men,What the opposite sex looks for,2_1,Intelligent,16.17214,9.753502,-6.418638,-11.518964,-0.586313
+Men,What the opposite sex looks for,2_1,Fun,18.006043,19.87429,1.868247,-4.830854,7.976753
+Men,What the opposite sex looks for,2_1,Ambitious,14.415863,2.219266,-12.196597,-15.235441,-7.055976
+Men,What the opposite sex looks for,2_1,Shared interests,10.481721,25.697855,15.216133,10.023676,20.650756
+Men,What I look for (day after),1_2,Attractive,31.70947,43.526885,11.817415,5.533346,17.40409
+Men,What I look for (day after),1_2,Sincere,14.753096,3.025467,-11.727629,-15.263312,-6.103002
+Men,What I look for (day after),1_2,Intelligent,16.809717,5.711749,-11.097967,-16.908548,-5.342642
+Men,What I look for (day after),1_2,Fun,17.488403,24.301458,6.813055,1.388857,12.147067
+Men,What I look for (day after),1_2,Ambitious,7.922388,0.184111,-7.738277,-8.729926,-1.970358
+Men,What I look for (day after),1_2,Shared interests,11.316928,23.25033,11.933402,5.284532,16.676918
+Men,What I look for (3-4 weeks later),1_3,Attractive,32.162587,43.526885,11.364298,4.589397,17.611357
+Men,What I look for (3-4 weeks later),1_3,Sincere,14.991259,3.025467,-11.965792,-15.96917,-6.216126
+Men,What I look for (3-4 weeks later),1_3,Intelligent,18.793706,5.711749,-13.081957,-19.020142,-7.317336
+Men,What I look for (3-4 weeks later),1_3,Fun,16.281469,24.301458,8.019989,2.50939,13.356569
+Men,What I look for (3-4 weeks later),1_3,Ambitious,7.087413,0.184111,-6.903302,-8.331261,-1.093692
+Men,What I look for (3-4 weeks later),1_3,Shared interests,10.683566,23.25033,12.566763,6.276031,17.498169

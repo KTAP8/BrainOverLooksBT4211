@@ -1,0 +1,25 @@
+top_k,comparison,metric,lift_pp,ci_low,ci_high,p
+1,Revealed weights minus Stated weights,Yes rate,2.212389,-1.548673,6.415929,0.245
+1,Revealed weights minus Stated weights,Match rate,-2.212389,-5.973451,1.548673,0.259
+1,Both likely to say yes minus Stated weights,Yes rate,-7.300885,-11.946903,-2.654867,0.001
+1,Both likely to say yes minus Stated weights,Match rate,9.955752,5.304204,14.60177,0.001
+1,Both likely to say yes minus Revealed weights,Yes rate,-9.513274,-14.380531,-4.646018,0.001
+1,Both likely to say yes minus Revealed weights,Match rate,12.168142,7.522124,17.035398,0.001
+1,"Revealed, post-date ratings minus Stated, post-date ratings",Yes rate,2.433628,0.0,5.088496,0.061
+1,"Revealed, post-date ratings minus Stated, post-date ratings",Match rate,1.548673,-1.99115,4.867257,0.415
+3,Revealed weights minus Stated weights,Yes rate,2.286136,0.588127,4.057891,0.013
+3,Revealed weights minus Stated weights,Match rate,0.663717,-1.032448,2.286136,0.413
+3,Both likely to say yes minus Stated weights,Yes rate,-3.539823,-5.752212,-1.327434,0.003
+3,Both likely to say yes minus Stated weights,Match rate,7.079646,4.941003,9.07264,0.001
+3,Both likely to say yes minus Revealed weights,Yes rate,-5.825959,-8.185841,-3.39233,0.001
+3,Both likely to say yes minus Revealed weights,Match rate,6.415929,4.20354,8.480826,0.001
+3,"Revealed, post-date ratings minus Stated, post-date ratings",Yes rate,1.548673,0.073746,3.097345,0.043
+3,"Revealed, post-date ratings minus Stated, post-date ratings",Match rate,-1.106195,-2.728614,0.442478,0.163
+5,Revealed weights minus Stated weights,Yes rate,1.150442,-0.132743,2.390487,0.081
+5,Revealed weights minus Stated weights,Match rate,-0.221239,-1.284292,0.79646,0.701
+5,Both likely to say yes minus Stated weights,Yes rate,-3.141593,-4.646018,-1.636062,0.001
+5,Both likely to say yes minus Stated weights,Match rate,3.982301,2.566372,5.39823,0.001
+5,Both likely to say yes minus Revealed weights,Yes rate,-4.292035,-5.840708,-2.787611,0.001
+5,Both likely to say yes minus Revealed weights,Match rate,4.20354,2.876106,5.663717,0.001
+5,"Revealed, post-date ratings minus Stated, post-date ratings",Yes rate,1.283186,0.353982,2.212389,0.011
+5,"Revealed, post-date ratings minus Stated, post-date ratings",Match rate,0.486726,-0.355088,1.415929,0.299

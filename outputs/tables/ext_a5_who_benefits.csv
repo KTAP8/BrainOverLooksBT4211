@@ -1,0 +1,10 @@
+tier,rule,people,match_rate,no_match_share
+Least chosen third,Stated weights,152,0.096491,0.730263
+Least chosen third,Revealed weights,152,0.096491,0.736842
+Least chosen third,Both likely to say yes,152,0.173246,0.572368
+Middle third,Stated weights,155,0.276344,0.367742
+Middle third,Revealed weights,155,0.265591,0.412903
+Middle third,Both likely to say yes,155,0.368817,0.264516
+Most chosen third,Stated weights,145,0.441379,0.186207
+Most chosen third,Revealed weights,145,0.473563,0.131034
+Most chosen third,Both likely to say yes,145,0.482759,0.131034

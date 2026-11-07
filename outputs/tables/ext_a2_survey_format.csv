@@ -1,0 +1,3 @@
+gender,rating_scale,hundred_points,people_rating,people_points,difference_estimate,ci_low,ci_high,p
+Women,14.911108,18.280737,40,183,-3.369629,-5.053461,-1.686272,0.001
+Men,17.459474,28.887432,44,185,-11.427958,-13.644607,-9.389738,0.001

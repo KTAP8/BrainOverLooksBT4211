@@ -1,0 +1,5 @@
+outcome,people,believed_attractiveness,p,actual_attractiveness,actual_p
+Own yes rate,314,-0.008823,0.302698,-0.06447,0.0
+Match rate,314,-0.00637,0.145486,0.048655,0.0
+Matches expected,299,0.195512,0.016518,0.004816,0.968632
+Satisfaction,273,0.02066,0.801341,-0.120282,0.229397

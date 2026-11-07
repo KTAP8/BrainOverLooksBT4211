@@ -1,0 +1,13 @@
+question,attribute,average_slope,tilt_per_sd,t_stat,p,people
+What I look for (sign-up),Attractive,0.174814,0.02715,3.576605,0.000348,268
+What I look for (sign-up),Sincere,0.005854,0.02497,2.698735,0.00696,268
+What I look for (sign-up),Intelligent,0.024537,0.026674,3.06983,0.002142,268
+What I look for (sign-up),Fun,0.096077,0.006346,0.768568,0.44215,268
+What I look for (sign-up),Ambitious,-0.002104,0.00734,0.892663,0.372038,268
+What I look for (sign-up),Shared interests,0.109611,0.028673,3.834778,0.000126,268
+What others of my gender look for,Attractive,0.179532,0.002166,0.236054,0.813391,268
+What others of my gender look for,Sincere,0.005453,-0.006613,-0.73438,0.462717,268
+What others of my gender look for,Intelligent,0.025884,0.000987,0.100987,0.919561,268
+What others of my gender look for,Fun,0.095044,0.015461,1.849476,0.064389,268
+What others of my gender look for,Ambitious,-0.003364,0.01326,1.678862,0.093179,268
+What others of my gender look for,Shared interests,0.107356,0.00503,0.538011,0.590569,268

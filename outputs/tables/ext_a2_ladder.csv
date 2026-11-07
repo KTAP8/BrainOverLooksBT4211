@@ -1,0 +1,7 @@
+gender,question,suffix,people,attractive_share,attractive_target,attractive_gap,gap_ci_low,gap_ci_high,mean_abs_error,error_ci_low,error_ci_high,error_change_vs_baseline,error_change_ci_low,error_change_ci_high,error_change_p,gap_change_vs_baseline,gap_change_ci_low,gap_change_ci_high,gap_change_p
+Women,What I look for (sign-up),1_1,55,18.043178,35.58886,17.545682,8.593544,24.569496,11.9378,8.928845,14.420929,1.028962,0.186578,1.86961,0.021,2.487322,0.121747,4.75634,0.043
+Women,What I look for (day after),1_2,55,20.5305,35.58886,15.05836,5.933271,21.704288,10.908838,7.842184,13.355711,,,,,,,,
+Women,What drove my decisions (day after),7_2,55,29.039879,35.58886,6.548981,-3.498452,13.677856,8.41433,5.786783,11.312562,-2.494508,-3.311109,-0.741678,0.003,-8.509379,-12.609797,-5.354001,0.001
+Men,What I look for (sign-up),1_1,54,29.44856,44.897366,15.448807,5.909561,24.875822,12.11671,8.4481,14.221865,1.374486,0.496569,2.198609,0.005,4.283951,1.57712,7.255795,0.003
+Men,What I look for (day after),1_2,54,33.73251,44.897366,11.164856,1.60335,20.380599,10.742225,6.892617,13.111491,,,,,,,,
+Men,What drove my decisions (day after),7_2,54,36.345029,44.897366,8.552337,-0.789902,18.067265,9.323482,5.744473,11.581901,-1.418742,-2.218816,-0.430369,0.007,-2.612519,-4.934375,-0.421631,0.011

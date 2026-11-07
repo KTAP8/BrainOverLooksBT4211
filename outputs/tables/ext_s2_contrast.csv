@@ -1,0 +1,10 @@
+group,effect,estimate_pp,placebo_mean_pp,excess_pp,placebo_p,rows,rating_change_per_sd,rating_change_p
+Everyone,Previous partner's attractiveness,-1.367868,0.00273,-1.370598,0.007992,8368,-0.001877,0.914623
+Everyone,"Same, holding previous decision fixed",-0.314366,1.232252,-1.546617,0.002997,8368,-0.001877,0.914623
+Everyone,Previous decision was yes (N7),-5.775723,-6.91644,1.140716,0.297702,8368,-0.001877,0.914623
+Women choosing,Previous partner's attractiveness,-0.824475,-0.034736,-0.789739,0.286713,4184,-0.001877,0.914623
+Women choosing,"Same, holding previous decision fixed",0.351798,1.093052,-0.741253,0.331668,4184,-0.001877,0.914623
+Women choosing,Previous decision was yes (N7),-7.008242,-6.794133,-0.214109,0.883117,4184,-0.001877,0.914623
+Men choosing,Previous partner's attractiveness,-1.719445,-0.02351,-1.695935,0.016983,4184,-0.001877,0.914623
+Men choosing,"Same, holding previous decision fixed",-0.863223,1.230655,-2.093878,0.015984,4184,-0.001877,0.914623
+Men choosing,Previous decision was yes (N7),-4.538448,-6.915564,2.377116,0.137862,4184,-0.001877,0.914623

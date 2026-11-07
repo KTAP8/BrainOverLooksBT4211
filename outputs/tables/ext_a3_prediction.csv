@@ -1,0 +1,17 @@
+people_rated,predictors,people,r2_ridge,r2_boosting
+Women,Demographics,274,-0.02306,-0.013185
+Women,Hobbies,274,-0.004461,-0.052101
+Women,Stated weights,274,-0.015833,-0.10336
+Women,Self-ratings,274,-0.014791,-0.097095
+Women,Lifestyle,274,0.000694,-0.093286
+Women,Full sign-up survey,274,0.007744,-0.026374
+Women,First 3 speed dates: yeses only,274,0.220638,0.230257
+Women,First 3 speed dates: ratings and yeses,274,0.292715,0.246679
+Men,Demographics,277,-0.021874,-0.043273
+Men,Hobbies,277,0.005707,0.010639
+Men,Stated weights,277,0.056032,-0.064888
+Men,Self-ratings,277,0.055528,0.011999
+Men,Lifestyle,277,0.083569,0.080928
+Men,Full sign-up survey,277,0.095806,0.029005
+Men,First 3 speed dates: yeses only,277,0.194641,0.18056
+Men,First 3 speed dates: ratings and yeses,277,0.290282,0.252436

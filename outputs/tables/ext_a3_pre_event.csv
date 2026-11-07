@@ -1,0 +1,4 @@
+model,pairs,auc,top_decile_match_rate,base_rate,top_decile_lift,lift_ci_low,lift_ci_high
+Pair facts only,4184,0.538099,0.205811,0.164914,1.247991,1.011405,1.487305
+"All pre-event, logistic",4184,0.57528,0.215496,0.164914,1.30672,1.049256,1.617188
+"All pre-event, boosting",4184,0.557861,0.210654,0.164914,1.277356,1.062156,1.579928

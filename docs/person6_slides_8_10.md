@@ -51,6 +51,25 @@ Copy into team deck in **speak order**: **8a** (pooled + FAQ) → **8b** (segmen
 
 **Speaker note (8b):** Different #1 bootstrap 95% CI ≈ +2.2 to +18.1 pp (`segment=different_top1`). Tables: `customer_value_lift_by_segment.csv`, `customer_value_top1_agreement.csv`.
 
+**Speaker note — what 78% vs 88% means (30% only):** Among **138** people where stated #1 and revealed #1 are **different partners**, **~78%** said yes to **stated’s** top pick and **~88%** to **revealed’s** top pick—not the same person before/after on one profile. Paired comparison: *which wrong-first pick gets more yeses when weights disagree?*
+
+---
+
+### Real-world product translation (report / slide 9 backup)
+
+This lab decision happens at **first contact** (~4-minute meeting). `dec` = *I* said yes; `match` = **both** said yes. We do **not** observe second dates—retention would be a later product KPI.
+
+| Product lever | What we model | Metric | What to do |
+|---------------|---------------|--------|------------|
+| **Feed / scroll ranking** (infinite list, “who is #1 for **me**”) | **Slides 8a–8b** (`05_customer_value`) | **Your** yes on top-1 / top-3 | Rank with **revealed-style** weights to lift **engagement** on first slots (~+3 pp pooled; **~+10 pp** when #1 changes). |
+| **Scarce introductions** (one Daily Pick, one event table, no double-booking) | **Extension market simulator** (e.g. `06_extended_analysis` / slide on limited recommendations) | **Mutual** match on assigned pair | **Coordinate** assignments; **optimise bilateral** interest (e.g. maximise predicted **P(I yes) × P(they yes)**), not only each user’s solo ranking. |
+
+**Why both can be true:** Revealed ranking can raise **my** yes on **my** #1 while **mutual** match on one-shot pairing need not rise as much—looks-heavy picks can be one-sided. In the team’s replay, structured pairing beats random; **optimised mutual** ≈ **24%** vs **stated ~22%** vs **revealed ~20%** mutual match, with **wide CIs** among structured rules—value is often **scarcity + coordination**, not picking stated vs revealed alone.
+
+**Not “optimising second dates”:** “Optimised for both saying yes” targets **mutual like on the first assigned meeting** (app: both swipe right on a curated pair), not date #2.
+
+**For the company:** Choose the KPI, then the policy—**revealed re-ranking** for feeds and first-slot engagement; **bilateral matching** when slots are exclusive; **stated surveys** as onboarding priors, not the sole ranker; **A/B test** yes, match, and retention in production (historical replay ≠ live lift).
+
 ---
 
 ### Backup: what if we changed the data? (Q&A slide, optional)
@@ -90,7 +109,8 @@ Use for Q&A; not required on the main deck.
 
 **Matching platforms**
 
-- Prototype feed ranking using **revealed-style** weights; track **yes / match rate** and downstream retention as CLV proxies.
+- **Two levers, two KPIs:** (1) **Feed ranking** — our simulation supports **revealed weights** for higher **yes on top picks**. (2) **Exclusive recommendations** — use **mutual-interest** assignment when each user gets one spotlight; extensions show coordination beats random; optimise **both-sided** yes when slots are scarce.
+- Prototype each path; track **yes**, **match**, then **retention** (this dataset has no second-date or revenue).
 - Frame as better **fit surfacing**, not manipulation; a yes is not long-term compatibility.
 
 **Citation footer:** Fisman et al. (2006); course framing — stated vs revealed conjoint.

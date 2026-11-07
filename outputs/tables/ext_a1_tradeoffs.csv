@@ -1,0 +1,7 @@
+gender,one_point_of,equals_points_of,ratio,ci_low,ci_high,share_of_draws_with_positive_denominator
+Women,Attractive,Intelligent,3.198163,1.998205,7.008316,1.0
+Women,Attractive,Fun,1.965962,1.446215,2.724927,1.0
+Women,Attractive,Shared interests,1.840026,1.445804,2.385738,1.0
+Men,Attractive,Intelligent,6.278373,3.525875,23.811925,0.993
+Men,Attractive,Fun,1.948273,1.583342,2.435044,1.0
+Men,Attractive,Shared interests,2.584737,2.02224,3.464843,1.0

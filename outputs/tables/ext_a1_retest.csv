@@ -1,0 +1,13 @@
+interval,attribute,people,correlation,ci_low,ci_high,mean_shift_pp
+Day after,Attractive,386,0.751263,0.692297,0.805455,4.249337
+Day after,Sincere,386,0.642352,0.56703,0.709268,-1.705326
+Day after,Intelligent,386,0.578208,0.481157,0.665645,-2.796422
+Day after,Fun,386,0.519469,0.429991,0.595217,0.090844
+Day after,Ambitious,386,0.573586,0.500431,0.64693,-0.896503
+Day after,Shared interests,386,0.563166,0.478622,0.639385,1.058071
+3-4 weeks later,Attractive,200,0.75306,0.670481,0.82623,3.533722
+3-4 weeks later,Sincere,200,0.702721,0.554307,0.816967,-0.965438
+3-4 weeks later,Intelligent,200,0.638266,0.524668,0.736431,-1.771723
+3-4 weeks later,Fun,200,0.461844,0.332632,0.587965,-1.319752
+3-4 weeks later,Ambitious,200,0.623987,0.53431,0.708279,-0.132233
+3-4 weeks later,Shared interests,200,0.525539,0.406022,0.640425,0.655425

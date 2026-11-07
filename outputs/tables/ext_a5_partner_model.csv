@@ -1,0 +1,4 @@
+partner_model,match_lift_pp,ci_low,ci_high,p,placebo_match_rate
+All partner facts,7.079646,4.941003,9.07264,0.001,0.254056
+Without partner yes rate,-0.663717,-2.433628,0.958702,0.447,0.26733
+Only partner yes rate,6.710914,4.572271,8.775811,0.001,0.254794

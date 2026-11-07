@@ -1,0 +1,5 @@
+rule,gini,top_20pct_share
+Random order,0.285437,0.302156
+Stated weights,0.617382,0.564272
+Revealed weights,0.658778,0.605253
+Both likely to say yes,0.594317,0.543489
