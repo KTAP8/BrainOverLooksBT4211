@@ -1,0 +1,17 @@
+measure,outcome,model,pp_per_sd,ci_low,ci_high,p,dates
+Felt shared interests (rated after the date),Mutual match,Raw,10.425229,9.198734,11.651724,0.0,6222
+Felt shared interests (rated after the date),Mutual match,Within rater,12.895695,11.526857,14.264533,0.0,6222
+Felt shared interests (rated after the date),Own yes,Raw,19.823624,18.190345,21.456903,0.0,6222
+Felt shared interests (rated after the date),Own yes,Within rater,24.122364,22.385372,25.859356,0.0,6222
+Actual hobby overlap (measured before),Mutual match,Raw,1.271579,0.160782,2.382375,0.024854,6173
+Actual hobby overlap (measured before),Mutual match,Within rater,1.133424,0.07716,2.189687,0.035454,6173
+Actual hobby overlap (measured before),Own yes,Raw,0.504399,-1.056771,2.065569,0.526573,6173
+Actual hobby overlap (measured before),Own yes,Within rater,1.882508,0.5549,3.210117,0.00545,6173
+Age gap (years),Mutual match,Raw,-2.573994,-3.491216,-1.656771,0.0,6134
+Age gap (years),Mutual match,Within rater,-2.478867,-3.474251,-1.483484,1e-06,6134
+Age gap (years),Own yes,Raw,-2.859016,-4.756137,-0.961895,0.00314,6134
+Age gap (years),Own yes,Within rater,-3.903793,-5.288796,-2.51879,0.0,6134
+Same race,Mutual match,Raw,0.376411,-0.718032,1.470854,0.500255,6222
+Same race,Mutual match,Within rater,0.942157,-0.157762,2.042076,0.093182,6222
+Same race,Own yes,Raw,1.079181,-0.495293,2.653655,0.179141,6222
+Same race,Own yes,Within rater,3.665008,2.231953,5.098064,1e-06,6222

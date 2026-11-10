@@ -1,0 +1,13 @@
+target,rule,people,roc_auc,average_precision,base_rate
+Mutual match,Random order,388,0.516342,0.365708,0.213878
+Mutual match,Stated weights,388,0.630437,0.463591,0.213878
+Mutual match,Revealed weights,388,0.627892,0.458618,0.213878
+Mutual match,Revealed + pair facts,388,0.634632,0.466587,0.213878
+Mutual match,Both likely to say yes,388,0.7101,0.552002,0.213878
+Mutual match,One model trained on matches,388,0.665137,0.508472,0.213878
+Own yes,Random order,452,0.488986,0.545478,0.446129
+Own yes,Stated weights,452,0.730128,0.719058,0.446129
+Own yes,Revealed weights,452,0.751484,0.739194,0.446129
+Own yes,Revealed + pair facts,452,0.75598,0.74365,0.446129
+Own yes,Both likely to say yes,452,0.674492,0.68706,0.446129
+Own yes,One model trained on matches,452,0.647306,0.65645,0.446129

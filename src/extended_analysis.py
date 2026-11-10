@@ -29,6 +29,7 @@ QUESTIONS = {
     "S1": "Can the say-do gap be shown on one map?",
     "S2": "Does the previous option change how the next is judged?",
     "S3": "Do limited, exclusive recommendations help?",
+    "S4": "Does feeling you share interests matter, or actually sharing them?",
     "R1": "Is the headline a halo effect?",
     "R2": "Does clipping drive the importance figures?",
     "R3": "Do dropouts bias the sample?",
@@ -49,8 +50,8 @@ TIERS = {"A": "Core", "S": "Supporting", "R": "Robustness", "N": "Not recommende
 FIGURES = {
     "A1": "", "A2": "ext_a2_survey_wording.png", "A3": "ext_a3_survey_vs_behaviour.png",
     "A4": "ext_a4_calibration.png; ext_a4_beliefs.png",
-    "A5": "ext_a5_yes_vs_match.png; ext_a5_funnel.png", "A6": "ext_a6_variance.png",
-    "S1": "ext_s1_perceptual_map.png", "S2": "ext_s2_contrast.png", "S3": "ext_s3_market.png",
+    "A5": "ext_a5_yes_vs_match.png; ext_a5_funnel.png; ext_a5_endings.png", "A6": "ext_a6_variance.png",
+    "S1": "ext_s1_perceptual_map.png", "S2": "ext_s2_contrast.png", "S3": "ext_s3_market.png", "S4": "ext_s4_common_ground.png",
     "R1": "ext_robustness.png", "R2": "ext_robustness.png", "R3": "ext_robustness.png",
     "R4": "ext_robustness.png",
 }

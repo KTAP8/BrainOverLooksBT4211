@@ -111,6 +111,77 @@ P(they say yes) comes from a logistic regression that uses:
 
 **Files:** `ext_a5_lifts.csv`, `ext_a5_seed_sensitivity.csv`, `ext_a5_history_design.csv`, `ext_a5_partner_model.csv`, `ext_a5_who_benefits.csv`, `ext_a5_exposure.csv`.
 
+### 5b. Where interest is wasted (A5j, new)
+
+**Question:** how much interest goes unreturned, and does ranking for both sides fix it?
+
+**Method** (`endings_table` in `src/ext_market.py`; the idea comes from a Kaggle notebook's "four endings" chart):
+- Every date ends one of four ways: match, only I said yes, only they said yes, or neither.
+- First counted over all 8,378 dates. Then counted in each person's top 3 under each ranking rule, from the same pre-date replay as 8c.
+- The change is tested with the usual paired person-level bootstrap.
+
+**Result:**
+
+| | Match | Only I said yes | Only they said yes | Neither |
+|---|---:|---:|---:|---:|
+| All dates | 16% | 26% | 25% | 33% |
+| Top 3, stated weights | 27% | 38% | 14% | 21% |
+| Top 3, revealed weights | 28% | 40% | 13% | 20% |
+| Top 3, both likely to say yes | 34% | 28% | 20% | 19% |
+
+- 51% of dates are one-sided, and **61% of yeses are never returned** (men 65%, women 55%).
+- Ranking for both sides cuts unreturned-yes slots by 10.6 pp (CI 8.3 to 12.7).
+
+**The catch:** the top-3 rows are a replay of people already in the room, as in 8c.
+
+**Files:** `ext_a5_endings.csv`, figure `ext_a5_endings.png`.
+
+### 5c. Why not just predict matches directly? (A5k, new)
+
+**Question:** our 8c rule combines two models (I'd say yes × they'd say yes). Would one model trained on matches do just as well?
+
+**Method** (`direct_vs_two_sided`, `rank_quality`):
+- In `ranking_frame`, a logistic regression is trained on `match` with exactly the facts the two-sided rule uses: the partner as rated by others in the opposite fold, the partner's yes rate, their stated weights and the pair facts.
+- It's trained on the other events and tested on the held-out one, as before.
+- Top-1 and top-3 match rates are compared with the paired bootstrap, over the same five random splits.
+- How well each rule *orders* a list is also scored within each person, with ROC-AUC and average precision (PR-AUC) against the base rate. PR-AUC is the Kaggle notebook's suggestion for a rare outcome. Within-person scoring matters because a ranking only reorders one person's list.
+
+**Result:**
+- **The two-sided rule wins:** top-3 matches 34.0% against 30.0%, +4.0 pp (CI 2.4 to 5.5). Across five splits the range is +1.2 to +4.0, and four of five are clearly above zero.
+- **Ranking quality for matches:** ROC-AUC .71 (two-sided), .67 (direct model), .63 (stated or revealed). Average precision .55 against a 21% base rate.
+- **A match is only a little harder to rank than a yes:** .71 vs .76.
+
+**The catch:** the reason it wins is plausible but untested. A match model only learns from the rarer combined outcome, while two models learn from every yes and no.
+
+**Files:** `ext_a5_direct_vs_two_sided.csv`, `ext_a5_rank_quality.csv`.
+
+### 5d. Felt vs actual shared interests (S4, new, supports decision 4)
+
+**Question:** decision 4 says to lead with shared interests. Should an app match on hobby overlap, or help people feel common ground?
+
+**Method** (`s4_common_ground`):
+- Match rate by band, on our core sample, for:
+  - felt shared interests (`shar`, rated after the date);
+  - actual hobby overlap (`int_corr`, the correlation of the two people's hobby ratings from sign-up);
+  - age gap and same race.
+- Intervals resample people, not rows.
+- Slopes come from a linear probability model per SD, with person-clustered errors, both raw and within each rater (subtracting a rater's mean removes how readily they say yes).
+
+**Result:**
+- **Felt shared interests:** 5% → 35% match from lowest to highest band (+12.9 pp per SD).
+- **Actual hobby overlap:** 16% → 20% (+1.1 pp per SD, p=.035, **adjusted .052**, so borderline).
+- **Age gap:** 20% → 9% from 0-2 to over 10 years.
+- **Same race:** no difference (18% vs 18%).
+
+**The catch:**
+- Felt shared interests is rated after the date and partly reflects overall liking, so it isn't something an app sees in advance.
+- The point is the contrast: the feeling matters, the measured overlap barely does.
+- **Use:** prompts and icebreakers that surface common ground, not hobby filters.
+
+**Files:** `ext_s4_common_ground.csv`, `ext_s4_common_ground_slopes.csv`, figure `ext_s4_common_ground.png`.
+
+**About the Kaggle notebook:** it uses a *synthetic* dataset (14,504 dates, 2,548 people, no missing values), so none of its numbers are cited. Only three ideas were reused: four endings, the direct-vs-two-sided question with PR-AUC, and banded charts.
+
 ## 6. Slide 8d: behaviour beats surveys (A3)
 
 **Question:** what predicts how much a person will be wanted later, their sign-up survey or their first three speed dates?
@@ -235,6 +306,9 @@ The step from matches to retention to subscription revenue is an industry assump
 - **Doesn't mutual ranking just push mass-likers?** Yes, all of the lift comes from partner yes rate, so we recommend a cap.
 - **Is "Daily Pick" better because of revealed weights?** No. Coordination beats random, but the weights can't be separated.
 - **Halo effect?** Using other people's ratings, attractiveness stays top.
+- **Why not just predict matches directly?** We tried it. One model trained on matches, using the same facts, gets 30% top-3 matches. Ranking on both sides' yes gets 34% (+4.0 pp, CI 2.4 to 5.5; +1.2 to +4.0 across five splits).
+- **How much interest is wasted?** Half of all dates are one-sided, and 61% of yeses are never returned. Ranking for both sides cuts unreturned yeses in the top 3 from 38% to 28%.
+- **Should apps match on shared hobbies?** No. The feeling of shared interests goes with a 5% → 35% match rate, but actual hobby overlap only 16% → 20%. Build prompts, not filters.
 
 ## 13. Lines cut from the script
 

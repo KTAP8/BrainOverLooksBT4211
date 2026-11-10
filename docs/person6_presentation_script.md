@@ -1,4 +1,4 @@
-# Person 6 speaking script (~4.2 minutes at 150 words a minute, slides 8a–8d, 9–10)
+# Person 6 speaking script (~5.2 minutes at 150 words a minute, slides 8a–8d, 9–10)
 
 Every slide ends on a decision a marketer can take. Methods, cut lines and Q&A answers are in [person6_methods_explainer.md](person6_methods_explainer.md).
 
@@ -34,19 +34,25 @@ But a company doesn't earn from yeses. It earns when people match, because match
 
 Decision: rank for mutual matches, not swipes."
 
-## Slide 8d (~25 sec) — Behaviour beats surveys
+## Slide 8d (~50 sec) — Behaviour beats surveys
 
 *Question this slide answers:* what predicts how much a person will be wanted later: their full sign-up survey, or their first three speed dates?
 
-"Should a company ask more questions, or watch what people do? Three speed dates predict who'll be wanted later far better than the whole sign-up survey: twenty-nine percent of the variation against one to ten. Person 5 found adding stated weights doesn't improve prediction.
+"Should a company ask more questions, or watch what people do? We ran it as a prediction contest. The target: what share of partners say yes to a person from date four onwards. One model gets their whole sign-up survey, about forty answers. The other gets only their first three dates: how those partners rated them, and whether they said yes. Both use ridge regression, so forty answers can't just fit noise, and we always score on events the model never saw.
+
+Three speed dates explain twenty-nine percent of the differences between people; the whole survey explains one to ten. A second model, gradient boosting, agrees. Person 5 found adding stated weights doesn't improve prediction.
 
 Decision: shorten sign-up and learn from early activity. The long survey adds friction and buys almost nothing."
 
-## Slide 9 (~70 sec) — Four decisions that drive revenue
+## Slide 9 (~95 sec) — Four decisions that drive revenue
 
 *Questions this slide answers:* how do these results become revenue, and what should the company do first? And if every person gets just one exclusive recommendation, like a Daily Pick, which pairing rule produces the most matches?
 
-"So how does this become revenue? A dating app earns when users stay and pay, and users stay when they match. Here, eighteen percent leave with no match, and they were less likely even to answer the next-day survey—eighty versus ninety percent. Each extra match adds six points to the chance of an actual date. So four decisions.
+"So how does this become revenue? A dating app makes money when users stay and pay. And users stay when the app works for them, which means they get matches. Our data has no revenue, but it lets us check each step of that chain.
+
+First, the problem: eighteen percent of people went home with zero matches. Second, those people drift away: only eighty percent of them even answered the next-day follow-up survey, against ninety percent of people who matched. Third, matches turn into real results: weeks later, every extra match raised the chance of going on an actual date by six points.
+
+So more matches mean users who stay engaged and get real dates, and that's what keeps them paying. Here are four ways to get more matches.
 
 One: rank for mutual matches, and cap mass-likers and the most popular profiles—ranking today gives the top fifth of users nearly sixty percent of the slots.
 

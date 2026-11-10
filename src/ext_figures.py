@@ -312,8 +312,66 @@ def robustness(tables):
     _save(fig, "ext_robustness.png")
 
 
+def endings(tables):
+    table = tables["a5_endings"].set_index("view")
+    views = [("All dates", "All dates"), ("Top 3: Stated weights", "Top 3, stated weights"),
+             ("Top 3: Revealed weights", "Top 3, revealed weights"),
+             ("Top 3: Both likely to say yes", "Top 3, both likely to say yes")]
+    parts = [("match", "Match", INK), ("only_i_said_yes", "Only I said yes", NEUTRAL),
+             ("only_they_said_yes", "Only they said yes", LIGHT), ("neither", "Neither", GRID)]
+    fig, ax = plt.subplots(figsize=(9.5, 3.4))
+    y = np.arange(len(views))[::-1]
+    left = np.zeros(len(views))
+    for key, label, colour in parts:
+        values = np.array([table.loc[v, key] for v, _ in views])
+        ax.barh(y, values, left=left, color=colour, height=0.6, label=label,
+                edgecolor=SURFACE, linewidth=2)
+        for yi, l, v in zip(y, left, values):
+            ax.text(l + v / 2, yi, f"{v:.0%}", ha="center", va="center", fontsize=9.5,
+                    color=SURFACE if key == "match" else INK)
+        left += values
+    ax.set_yticks(y, [label for _, label in views])
+    ax.set_xlim(0, 1)
+    ax.xaxis.set_major_formatter(matplotlib.ticker.PercentFormatter(1, decimals=0))
+    ax.legend(ncol=4, loc="lower left", bbox_to_anchor=(0, 1.0), frameon=False, fontsize=9)
+    _hgrid(ax)
+    _title(fig, "Half of all dates end one-sided; ranking for both sides turns some into matches",
+           f"All dates: every pair (n={int(table.loc['All dates', 'count']):,}). Top 3: average person "
+           f"(n={int(table.loc['Top 3: Stated weights', 'count'])}), pre-date information, unseen events.",
+           top=1.1)
+    _save(fig, "ext_a5_endings.png")
+
+
+def common_ground(tables):
+    table = tables["s4_common_ground"]
+    measures = list(dict.fromkeys(table["measure"]))
+    fig, axes = plt.subplots(1, len(measures), figsize=(13, 3.6), sharey=True)
+    for ax, measure in zip(axes, measures):
+        part = table[table["measure"] == measure]
+        x = np.arange(len(part))
+        colour = INK if measure.startswith("Felt") else NEUTRAL
+        ax.bar(x, part["match_rate"], color=colour, width=0.62)
+        ax.errorbar(x, part["match_rate"], yerr=[part["match_rate"] - part["match_ci_low"],
+                                                  part["match_ci_high"] - part["match_rate"]],
+                    fmt="none", ecolor=MUTED, elinewidth=1, capsize=2)
+        for xi, v, top in zip(x, part["match_rate"], part["match_ci_high"]):
+            ax.text(xi, top + 0.008, f"{v:.0%}", ha="center", va="bottom", fontsize=9.5)
+        ax.axhline(part["average_match_rate"].iloc[0], color=INK, lw=1, ls="--")
+        ax.set_xticks(x, part["band"], fontsize=8.5)
+        ax.set_title(measure.replace(" (", "\n("), loc="left", fontsize=10.5)
+        ax.yaxis.set_major_formatter(matplotlib.ticker.PercentFormatter(1, decimals=0))
+        ax.set_ylim(0, 0.42)
+        ax.grid(axis="y", color=GRID, linewidth=0.8)
+        ax.set_axisbelow(True)
+    axes[0].set_ylabel("Mutual match rate")
+    _title(fig, "Feeling you share interests matters; actually sharing hobbies barely does",
+           "Core sample, 95% intervals resample people. Dashed line: average match rate. "
+           "Felt shared interests is rated after the date, so an app can't see it beforehand.", top=1.08)
+    _save(fig, "ext_s4_common_ground.png")
+
+
 def make_all(tables, summary=None):
     _style()
     for chart in (survey_wording, survey_vs_behaviour, calibration, beliefs, yes_vs_match, funnel,
-                  variance, perceptual_map, contrast, market, robustness):
+                  variance, perceptual_map, contrast, market, robustness, endings, common_ground):
         chart(tables)

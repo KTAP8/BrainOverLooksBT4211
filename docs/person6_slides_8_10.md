@@ -96,6 +96,11 @@ Original draft content follows. Copy into team deck in **speak order**: **8a** (
 
 **Speaker note (8c):** Quote the range, because +7.1 is the highest of five random splits. Without partner yes rate, the lift is -0.7 pp. Tables: `ext_a5_lifts.csv`, `ext_a5_seed_sensitivity.csv`, `ext_a5_history_design.csv`, `ext_a5_partner_model.csv`.
 
+**New material for 8c (optional, not in the script yet):**
+- **On-slide line:** "Half of all dates end one-sided: **61% of yeses are never returned.**" Optional visual: `ext_a5_endings.png`.
+- **Suggested spoken line:** "Half of all dates end one-sided. Six in ten yeses are never returned. That's wasted effort, and ranking for both sides cuts it from 38 to 28 percent of the top three."
+- **Q&A backup:** "Why not just predict matches?" One model trained on matches gets 30% top-3 matches, and our two-sided rule gets 34% (+4.0 pp, CI 2.4 to 5.5; +1.2 to +4.0 across five splits). Table `ext_a5_direct_vs_two_sided.csv`.
+
 ---
 
 ## Slide 8d — Behaviour beats surveys
@@ -171,6 +176,10 @@ Use for Q&A; not required on the main deck.
 | **Shorten onboarding**; learn from behaviour | Less sign-up friction, no loss in prediction | First 3 dates **R² .29** vs survey **.01 to .10**; Person 5: AUC unchanged | Sign-up completion |
 | **Sell scarce, coordinated picks** (Daily Pick) | A premium feature users can pay for | Optimised vs random **+6.3 pp** (CI 2.5 to 10.3); structured rules can't be separated | Upgrade rate |
 | **Market on what drives choice** | Ads and prompts that match real choices | Revealed weights: looks **38-47**, fun **20-24**, shared interests **20-22**, ambition **0-1** | Ad click-through, profile completion |
+
+**Optional nuance for decision 4 (S4):** "Shared interests" means the *feeling* of common ground. Felt shared interests goes with match rates of **5% → 35%**, while actual hobby overlap only **16% → 20%** (borderline after correction). So use conversation prompts and icebreakers, not hobby filters.
+- **Suggested spoken add-on:** "...and shared interests, but the *feeling* of them: actual hobby overlap barely moves matches, so build prompts, not filters."
+- **Figure:** `ext_s4_common_ground.png`.
 
 **Footnote on slide:** Historical replays, not live tests, so each decision ships as an A/B test. Frame it as better fit surfacing, not manipulation.
 

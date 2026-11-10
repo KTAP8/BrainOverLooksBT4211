@@ -1,0 +1,9 @@
+view,unit,count,neither,only_i_said_yes,only_they_said_yes,match,one_sided,unreturned_yes_share
+All dates,dates,8378,0.325257,0.255192,0.254834,0.164717,0.510026,0.607732
+All dates: men choosing,dates,4194,0.325703,0.309728,0.200048,0.164521,0.509776,0.653092
+All dates: women choosing,dates,4184,0.324809,0.200526,0.309751,0.164914,0.510277,0.548725
+"Core sample, average person",people,452,0.296916,0.262535,0.256955,0.183594,0.51949,0.588474
+Top 3: Random order,people,452,0.311209,0.252212,0.254794,0.181785,0.507006,0.581138
+Top 3: Stated weights,people,452,0.205015,0.382743,0.143437,0.268805,0.52618,0.587436
+Top 3: Revealed weights,people,452,0.196165,0.398968,0.129425,0.275442,0.528392,0.59158
+Top 3: Both likely to say yes,people,452,0.187316,0.276549,0.196534,0.339602,0.473083,0.448833

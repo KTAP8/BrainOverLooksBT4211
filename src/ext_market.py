@@ -14,7 +14,7 @@ from scipy.sparse.linalg import lsqr
 from sklearn.ensemble import HistGradientBoostingClassifier, HistGradientBoostingRegressor
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LogisticRegression, RidgeCV
-from sklearn.metrics import roc_auc_score
+from sklearn.metrics import average_precision_score, roc_auc_score
 from sklearn.model_selection import GroupKFold, cross_val_predict
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
@@ -33,7 +33,7 @@ HOBBIES = ("sports tvsports exercise dining museums art hiking gaming clubbing r
 RULE_LABELS = {"random": "Random order", "stated": "Stated weights",
                "revealed": "Revealed weights", "revealed_pair": "Revealed + pair facts",
                "popularity": "Popularity", "partner_only": "Partner likely to say yes",
-               "reciprocal": "Both likely to say yes"}
+               "reciprocal": "Both likely to say yes", "direct_match": "One model trained on matches"}
 
 
 def top_k(frame, rule, k):
@@ -64,6 +64,16 @@ def partner_features(frame, mode):
     return x.fillna(0)
 
 
+def match_features(frame):
+    """Every pre-date fact the two-sided rule uses, for one direct match model:
+    the partner as others in the opposite fold saw them, the partner's yes rate,
+    their stated weights and the pair facts."""
+    x = partner_features(frame, "full")
+    for column in SPLIT_FOLD:
+        x[column] = frame[column].to_numpy()
+    return x
+
+
 def ranking_frame(ctx, seed=SEED, mode="full"):
     """Score each person's list on events the models never saw."""
     frame = add_pair_features(add_split_fold(ctx.data, seed))
@@ -87,6 +97,10 @@ def ranking_frame(ctx, seed=SEED, mode="full"):
             model = LogisticRegression(C=1.0, max_iter=1000)
             model.fit(partner_features(train, mode), train["dec_o"])
             test["partner_only"] = model.predict_proba(partner_features(test, mode))[:, 1]
+            # A5k: one model trained on the match itself, from the same facts.
+            direct = make_pipeline(StandardScaler(), LogisticRegression(C=1.0, max_iter=1000))
+            direct.fit(match_features(train), train["match"])
+            test["direct_match"] = direct.predict_proba(match_features(test))[:, 1]
             # Own side: rescale utility to this person's yes rate; constant
             # within a list, so it cannot steer the ranking between partners.
             rate = test.groupby("iid")["dec"].transform("mean").clip(0.02, 0.98)
@@ -231,6 +245,83 @@ def simulate_market(scored, n_random=30):
 # ------------------------------------------------------------- A5 the metric
 
 
+ENDINGS = ["neither", "only_i_said_yes", "only_they_said_yes", "match"]
+
+
+def endings(per_person):
+    """Split slots into four endings from per-person means of dec, dec_o, match."""
+    out = pd.DataFrame({"match": per_person["match"],
+                        "only_i_said_yes": per_person["dec"] - per_person["match"],
+                        "only_they_said_yes": per_person["dec_o"] - per_person["match"]})
+    out["neither"] = 1 - out.sum(axis=1)
+    return out[ENDINGS]
+
+
+def endings_table(data, scored, outcomes):
+    """A5j: how often interest goes unreturned, overall and in each top 3."""
+    rows = []
+    every = data.dropna(subset=["dec", "dec_o", "match"])
+    for label, part in [("All dates", every), ("All dates: men choosing", every[every["gender"] == 1]),
+                        ("All dates: women choosing", every[every["gender"] == 0])]:
+        shares = endings(part[["dec", "dec_o", "match"]].astype(float)).mean()
+        rows.append(dict(view=label, unit="dates", count=len(part), **shares))
+    shares = endings(scored.groupby("iid")[["dec", "dec_o", "match"]].mean()).mean()
+    rows.append(dict(view="Core sample, average person", unit="people",
+                     count=scored["iid"].nunique(), **shares))
+    for rule in ("random", "stated", "revealed", "reciprocal"):
+        top = outcomes[rule, 3]
+        rows.append(dict(view=f"Top 3: {RULE_LABELS[rule]}", unit="people", count=len(top),
+                         **endings(top).mean()))
+    table = pd.DataFrame(rows)
+    table["one_sided"] = table["only_i_said_yes"] + table["only_they_said_yes"]
+    table["unreturned_yes_share"] = table["only_i_said_yes"] / (table["only_i_said_yes"] + table["match"])
+    return table
+
+
+def _within_person(frame, score, target, metric):
+    """Mean per-person score of how well `score` orders one person's list."""
+    values = []
+    for _, group in frame.groupby("iid"):
+        y = group[target].to_numpy()
+        if 0 < y.sum() < len(y):
+            values.append(metric(y, group[score].to_numpy()))
+    return np.array(values)
+
+
+def rank_quality(scored):
+    """How well each rule orders a person's list, for their yes and for a match.
+
+    Scored within each person, since that is all a ranking uses; pooled
+    metrics would reward knowing who says yes to everyone. Average precision is
+    shown against the base rate of the same people, as the Kaggle notebook
+    suggests for a rare outcome.
+    """
+    rows = []
+    for target, label in (("match", "Mutual match"), ("dec", "Own yes")):
+        eligible = scored.groupby("iid")[target].transform(lambda y: 0 < y.sum() < len(y)).astype(bool)
+        base = scored[eligible].groupby("iid")[target].mean().mean()
+        for rule in ("random", "stated", "revealed", "revealed_pair", "reciprocal", "direct_match"):
+            auc = _within_person(scored, rule, target, roc_auc_score)
+            precision = _within_person(scored, rule, target, average_precision_score)
+            rows.append(dict(target=label, rule=RULE_LABELS[rule], people=len(auc),
+                             roc_auc=auc.mean(), average_precision=precision.mean(), base_rate=base))
+    return pd.DataFrame(rows)
+
+
+def direct_vs_two_sided(scored, seed, n_boot):
+    """A5k: one model trained on matches, against the two-sided rule."""
+    rows = []
+    for k in (1, 3):
+        both, direct = top_k(scored, "reciprocal", k), top_k(scored, "direct_match", k)
+        for column, metric in (("match", "Match rate"), ("dec", "Yes rate")):
+            lift = paired_lift(both, direct, column, n_boot)
+            rows.append(dict(seed=seed, top_k=k, metric=metric, two_sided=both[column].mean(),
+                             direct_model=direct[column].mean(), two_sided_minus_direct_pp=lift["estimate"],
+                             ci_low=lift["ci_low"], ci_high=lift["ci_high"], p=lift["p"],
+                             people=len(both)))
+    return rows
+
+
 def a5_metric(ctx):
     """Does ranking on revealed weights raise matches, and what would?"""
     scored = ranking_frame(ctx)
@@ -257,9 +348,10 @@ def a5_metric(ctx):
                                       ci_low=result["ci_low"], ci_high=result["ci_high"], p=result["p"]))
     lifts = pd.DataFrame(lift_rows)
 
-    seed_rows = []
+    seed_rows, direct_rows = [], []
     for seed in SEEDS:
         replicate = ranking_frame(ctx, seed) if seed != SEED else scored
+        direct_rows += direct_vs_two_sided(replicate, seed, ctx.n_boot)
         stated, revealed, both = (top_k(replicate, r, 3) for r in ("stated", "revealed", "reciprocal"))
         seed_rows.append(dict(seed=seed, stated_match=stated["match"].mean(),
                               revealed_match=revealed["match"].mean(),
@@ -365,6 +457,17 @@ def a5_metric(ctx):
     both_rows = ranking[ranking["rule"] == "Both likely to say yes"].set_index("top_k")
     no_selectivity = modes[modes["partner_model"] == "Without partner yes rate"].iloc[0]
     n_scored = scored["iid"].nunique()
+    endings_tbl = endings_table(ctx.data, scored, outcomes)
+    ending = endings_tbl.set_index("view")
+    unreturned = paired_lift(outcomes["reciprocal", 3].eval("dec - match").to_frame("x"),
+                             outcomes["stated", 3].eval("dec - match").to_frame("x"), "x", ctx.n_boot)
+    quality = rank_quality(scored)
+    direct_tbl = pd.DataFrame(direct_rows)
+    main_direct = direct_tbl[(direct_tbl["seed"] == SEED) & (direct_tbl["top_k"] == 3)
+                             & (direct_tbl["metric"] == "Match rate")].iloc[0]
+    direct_range = direct_tbl[(direct_tbl["top_k"] == 3) & (direct_tbl["metric"] == "Match rate")][
+        "two_sided_minus_direct_pp"]
+    auc = quality.set_index(["target", "rule"])["roc_auc"]
     low_stated = tiers[(tiers["tier"] == "Least chosen third") & (tiers["rule"] == "Stated weights")].iloc[0]
     low_both = tiers[(tiers["tier"] == "Least chosen third") & (tiers["rule"] == "Both likely to say yes")].iloc[0]
     rows = [
@@ -414,13 +517,111 @@ def a5_metric(ctx):
                        f"stand-in for retention",
                 response.params["no_match"], p=response.pvalues["no_match"], unit="log-odds",
                 sample=f"{len(people)} people", table="a5_funnel", primary=True),
+        finding("A5j", f"{ending.loc['All dates', 'one_sided']:.0%} of dates end one-sided and "
+                       f"{ending.loc['All dates', 'unreturned_yes_share']:.0%} of yeses are never returned. "
+                       f"In the top 3, ranking for both sides moves unreturned-yes slots from "
+                       f"{ending.loc['Top 3: Stated weights', 'only_i_said_yes']:.0%} to "
+                       f"{ending.loc['Top 3: Both likely to say yes', 'only_i_said_yes']:.0%}",
+                unreturned["estimate"], (unreturned["ci_low"], unreturned["ci_high"]), unreturned["p"],
+                "pp of top-3 slots with an unreturned yes", f"{n_scored} people", "a5_endings",
+                primary=True),
+        finding("A5k", f"Against one model trained on matches from the same facts, the two-sided rule "
+                       f"gives {main_direct.two_sided_minus_direct_pp:+.1f} pp top-3 matches "
+                       f"({direct_range.min():+.1f} to {direct_range.max():+.1f} across five splits). "
+                       f"Within-list AUC: {auc['Mutual match', 'Both likely to say yes']:.2f} for "
+                       f"matches (two-sided rule), {auc['Own yes', 'Revealed + pair facts']:.2f} for "
+                       f"own yeses (revealed + pair facts)",
+                main_direct.two_sided_minus_direct_pp, (main_direct.ci_low, main_direct.ci_high),
+                main_direct.p, "pp match, top 3", f"{n_scored} people", "a5_direct_vs_two_sided",
+                primary=True),
     ]
     return dict(tables=dict(a5_ranking=ranking, a5_lifts=lifts, a5_seed_sensitivity=seeds,
                             a5_partner_model=modes, a5_exposure=exposure, a5_who_benefits=tiers,
-                            a5_history_design=history_table, a5_funnel=funnel), rows=rows)
+                            a5_history_design=history_table, a5_funnel=funnel,
+                            a5_endings=endings_tbl, a5_direct_vs_two_sided=direct_tbl,
+                            a5_rank_quality=quality), rows=rows)
 
 
 # ------------------------------------------------------- S3 market simulator
+
+
+# ------------------------------------------------------ S4 common ground
+
+COMMON_GROUND = [
+    ("shar", "Felt shared interests (rated after the date)", [-0.1, 3, 5, 7, 10], ["0-3", "3-5", "5-7", "7-10"]),
+    ("int_corr", "Actual hobby overlap (measured before)", None, ["Q1 least", "Q2", "Q3", "Q4 most"]),
+    ("agegap", "Age gap (years)", [-0.1, 2, 5, 10, 60], ["0-2", "3-5", "6-10", "Over 10"]),
+    ("samerace", "Same race", [-0.1, 0.5, 1.1], ["Different", "Same"]),
+]
+
+
+def cluster_rate(frame, column, n_boot, seed=SEED):
+    """Mean of a 0/1 column with an interval that resamples people, not rows."""
+    per = frame.groupby("iid")[column].agg(["sum", "count"])
+    rng = np.random.default_rng(seed)
+    idx = rng.integers(0, len(per), (n_boot, len(per)))
+    sums, counts = per["sum"].to_numpy()[idx].sum(axis=1), per["count"].to_numpy()[idx].sum(axis=1)
+    draws = sums / counts
+    return float(frame[column].mean()), float(np.quantile(draws, 0.025)), float(np.quantile(draws, 0.975))
+
+
+def s4_common_ground(ctx):
+    """Does feeling you share interests matter, or actually sharing them?
+
+    Bands follow the Kaggle notebook's charts, on our real core sample. Slopes
+    are per SD, with person-clustered errors, raw and within each rater
+    (subtracting a rater's mean removes how readily they say yes overall).
+    """
+    frame = ctx.sample.copy()
+    frame["agegap"] = (frame["age"] - frame["age_o"]).abs()
+    band_rows, slope_rows = [], []
+    for column, label, edges, names in COMMON_GROUND:
+        part = frame.dropna(subset=[column]).copy()
+        if edges is None:
+            part["band"] = pd.qcut(part[column], 4, labels=names)
+        else:
+            part["band"] = pd.cut(part[column], edges, labels=names)
+        for band, group in part.groupby("band", observed=True):
+            match, m_low, m_high = cluster_rate(group, "match", ctx.n_boot)
+            yes, y_low, y_high = cluster_rate(group, "dec", ctx.n_boot)
+            band_rows.append(dict(measure=label, band=str(band), dates=len(group),
+                                  people=group["iid"].nunique(), match_rate=match, match_ci_low=m_low,
+                                  match_ci_high=m_high, yes_rate=yes, yes_ci_low=y_low,
+                                  yes_ci_high=y_high, average_match_rate=part["match"].mean()))
+        part["z"] = (part[column] - part[column].mean()) / part[column].std()
+        for outcome in ("match", "dec"):
+            for model in ("Raw", "Within rater"):
+                data = part[["iid", "z", outcome]].copy()
+                if model == "Within rater":
+                    data[["z", outcome]] = demean(data, ["z", outcome])
+                fit = ols_cluster(f"{outcome} ~ z", data, data["iid"])
+                low, high = fit.conf_int().loc["z"]
+                slope_rows.append(dict(measure=label, outcome="Mutual match" if outcome == "match" else "Own yes",
+                                       model=model, pp_per_sd=fit.params["z"] * 100, ci_low=low * 100,
+                                       ci_high=high * 100, p=fit.pvalues["z"], dates=len(data)))
+    bands, slopes = pd.DataFrame(band_rows), pd.DataFrame(slope_rows)
+
+    def band(measure, name):
+        return bands[(bands["measure"] == measure) & (bands["band"] == name)].iloc[0]
+
+    def slope(measure):
+        return slopes[(slopes["measure"] == measure) & (slopes["outcome"] == "Mutual match")
+                      & (slopes["model"] == "Within rater")].iloc[0]
+
+    felt, actual = COMMON_GROUND[0][1], COMMON_GROUND[1][1]
+    s_felt, s_actual = slope(felt), slope(actual)
+    rows = [
+        finding("S4a", f"Felt shared interests: match rate {band(felt, '0-3').match_rate:.0%} to "
+                       f"{band(felt, '7-10').match_rate:.0%} from lowest to highest band",
+                s_felt.pp_per_sd, (s_felt.ci_low, s_felt.ci_high), s_felt.p, "pp match per SD, within rater",
+                f"{int(s_felt.dates)} dates", "s4_common_ground", primary=True),
+        finding("S4b", f"Actual hobby overlap: match rate {band(actual, 'Q1 least').match_rate:.0%} to "
+                       f"{band(actual, 'Q4 most').match_rate:.0%} from lowest to highest quarter",
+                s_actual.pp_per_sd, (s_actual.ci_low, s_actual.ci_high), s_actual.p,
+                "pp match per SD, within rater", f"{int(s_actual.dates)} dates", "s4_common_ground",
+                primary=True),
+    ]
+    return dict(tables=dict(s4_common_ground=bands, s4_common_ground_slopes=slopes), rows=rows)
 
 
 def s3_market_simulator(ctx):
@@ -797,4 +998,4 @@ def n6_first_choices(ctx):
 
 
 ANALYSES = [a3_survey_vs_behaviour, a5_metric, a6_personalisation_limit, s2_contrast,
-            s3_market_simulator, n6_first_choices]
+            s3_market_simulator, s4_common_ground, n6_first_choices]

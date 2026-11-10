@@ -125,6 +125,53 @@ class Market(Shared):
         self.assertAlmostEqual(em.gini([3, 3, 3, 3]), 0.0)
 
 
+class KaggleAdaptations(Shared):
+    """A5j endings, A5k direct match model and S4 common ground."""
+
+    def test_endings_sum_to_one_and_keep_the_match_share(self):
+        rng = np.random.default_rng(6)
+        dec, dec_o = rng.integers(0, 2, 500), rng.integers(0, 2, 500)
+        frame = pd.DataFrame(dict(dec=dec, dec_o=dec_o, match=dec * dec_o)).astype(float)
+        shares = em.endings(frame)
+        np.testing.assert_allclose(shares.sum(axis=1), 1.0)
+        self.assertAlmostEqual(shares["match"].mean(), frame["match"].mean())
+        self.assertTrue((shares >= 0).all().all())
+
+    def test_unreturned_yes_is_counted_as_only_i(self):
+        one = pd.DataFrame(dict(dec=[1.0], dec_o=[0.0], match=[0.0]))
+        self.assertEqual(em.endings(one).iloc[0].to_dict(),
+                         dict(neither=0.0, only_i_said_yes=1.0, only_they_said_yes=0.0, match=0.0))
+
+    def test_direct_model_uses_no_outcome_of_the_row(self):
+        frame = ef.add_pair_features(ef.add_split_fold(self.data)).dropna(subset=ef.SPLIT_FOLD).head(50)
+        x = em.match_features(frame)
+        self.assertFalse(set(x.columns) & {"dec", "dec_o", "match"})
+        # Columns named after a trait hold the partner's STATED weight, never
+        # this row's post-date rating.
+        for attribute in ATTRS:
+            expected = frame[ef.PARTNER_STATED[attribute]].fillna(16.7).fillna(0) / 100
+            np.testing.assert_allclose(x[attribute], expected.fillna(0))
+
+    def test_adding_the_direct_model_leaves_published_rankings_alone(self):
+        ctx = es.Context(self.data, self.sample, 10)
+        scored = em.ranking_frame(ctx)
+        self.assertFalse(scored["direct_match"].isna().any())
+        saved = pd.read_csv(project_root() / TABLES_DIR / "ext_a5_ranking.csv")
+        saved = saved[saved["top_k"] == 3].set_index("rule")["match_rate"]
+        for rule in ("stated", "revealed", "reciprocal"):
+            self.assertAlmostEqual(em.top_k(scored, rule, 3)["match"].mean(),
+                                   saved[em.RULE_LABELS[rule]], places=5)
+
+    def test_common_ground_bands_cover_every_row(self):
+        result = em.s4_common_ground(es.Context(self.data, self.sample, 20))
+        bands = result["tables"]["s4_common_ground"]
+        frame = self.sample.assign(agegap=(self.sample["age"] - self.sample["age_o"]).abs())
+        for column, label, _, _ in em.COMMON_GROUND:
+            self.assertEqual(bands.loc[bands["measure"] == label, "dates"].sum(),
+                             frame[column].notna().sum())
+        self.assertTrue(np.isfinite(result["tables"]["s4_common_ground_slopes"]["pp_per_sd"]).all())
+
+
 class LatentClass(Shared):
     def test_one_class_equals_the_conditional_logit(self):
         strata = ef.make_strata(self.sample[self.sample["gender"] == 0], ATTRS)

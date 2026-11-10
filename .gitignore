@@ -30,3 +30,6 @@ build/
 # Slide / Canva deck assets (regenerate: python -m src.deck_visuals)
 outputs/figures/deck_*.png
 outputs/figures/deck_full_*.png
+
+# Reference notebook from Kaggle (synthetic data, not ours)
+speed-dating-data-analysis.ipynb

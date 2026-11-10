@@ -14,7 +14,7 @@ Every number comes from `outputs/tables/ext_summary.csv` and the `ext_` tables. 
 | A2 | Can I write a better survey? | Yes. Ask what others want, and what drove past decisions | Looks gap falls from 17.4 to 6.9 (women) and 15.1 to 8.7 (men) |
 | A3 | More survey data or more behaviour? | Behaviour | First 3 speed dates R² .29; full sign-up survey .01 to .10 |
 | A4 | Do customers understand the market? | No | Guesses about a partner's yes score worse than predicting the average |
-| A5 | Which metric should I optimise? | Mutual matches, not yeses | Revealed ranking: no clear match lift. Ranking for mutual interest: +2.5 to +7.1 pp |
+| A5 | Which metric should I optimise? | Mutual matches, not yeses | Revealed ranking: no clear match lift. Ranking for mutual interest: +2.5 to +7.1 pp. 51% of dates end one-sided |
 | A6 | How much can personalisation do? | Less than people assume | 63-67% of a yes is unexplained, and pair facts add nothing |
 
 **If time is tight, keep A2 and A3.** They speak most directly to the survey problem. Then add A5, because the existing slide 8 needs changing anyway.
@@ -130,7 +130,19 @@ Random order is one random draw; each person's true average is 45% yes and 18% m
 - **Weak retention signal:** people with no match answered the next-day survey less often (80% vs 90%).
 - **Marketing use:** make mutual matches the target metric, especially for users at risk of getting none (see Pizzato et al., 2010, on reciprocal recommenders).
 - **Caveats:** this is a replay of people already in the room, not a live test. Only 48% answered the follow-up, and dates can't be linked to a specific pair.
-- **Files:** `ext_a5_ranking.csv`, `ext_a5_lifts.csv`, `ext_a5_seed_sensitivity.csv`, `ext_a5_history_design.csv`, `ext_a5_partner_model.csv`, `ext_a5_who_benefits.csv`, `ext_a5_exposure.csv`, `ext_a5_funnel.csv`.
+![Endings](../outputs/figures/ext_a5_endings.png)
+
+**A5j. Where interest is wasted.** Every date ends one of four ways. Across all 8,378 dates:
+- 16% match, 51% are one-sided and 33% are neither. **61% of yeses are never returned** (65% of men's yeses, 55% of women's).
+- In each person's top 3, ranking for both sides cuts slots with an unreturned yes from 38% (stated) to 28%: -10.6 pp (CI -12.7 to -8.3, adjusted p=.002). Matches rise from 27% to 34%.
+- **Marketing use:** an unreturned yes is effort that earns the user nothing. This is the waste that ranking for mutual interest removes.
+
+**A5k. Is the two-sided rule the right design?** The obvious alternative is one model trained directly on matches. We fitted it on the same pre-date facts, in the same held-out events.
+- **The two-sided rule wins:** +4.0 pp top-3 matches (CI 2.4 to 5.5, adjusted p=.002). Across five splits the range is +1.2 to +4.0, with four of five clearly above zero. At top 1 it's +2.9 to +5.3 pp.
+- **Likely reason (not tested directly):** a match needs two separate yeses. Modelling each side learns from every yes and no, whereas a single match model learns only from the rarer combined outcome.
+- **Is a match harder to rank than a yes?** Within each person's list, ROC-AUC is .71 for matches (two-sided rule) and .76 for own yeses (revealed + pair facts). Average precision for matches is .55 against a 21% base rate. Stated and revealed weights rank matches equally well (.63 each), consistent with A5b.
+- **Method note:** the metrics are scored within each person's list, because that's all a ranking uses. Pooled metrics would reward knowing who says yes to everyone. PR-AUC follows the Kaggle notebook's suggestion for a rare outcome.
+- **Files:** `ext_a5_ranking.csv`, `ext_a5_lifts.csv`, `ext_a5_seed_sensitivity.csv`, `ext_a5_history_design.csv`, `ext_a5_partner_model.csv`, `ext_a5_who_benefits.csv`, `ext_a5_exposure.csv`, `ext_a5_funnel.csv`, `ext_a5_endings.csv`, `ext_a5_direct_vs_two_sided.csv`, `ext_a5_rank_quality.csv`.
 
 ### A6. How much can personalisation do?
 
@@ -169,6 +181,24 @@ Random order is one random draw; each person's true average is 45% yes and 18% m
 - **What's clear:** optimised beats random by 6.3 pp (CI 2.5 to 10.3). With two slots, all three beat random by 4.4 to 5.0 pp.
 - **What isn't:** optimised vs stated is +1.9 pp (CI -4.4 to 8.8), so don't claim one structured rule beats another.
 - **Marketing use:** coordinating scarce recommendations helps (stable matching: Gale and Shapley, 1962). The weights matter less.
+
+### S4. Does feeling you share interests matter, or actually sharing them?
+
+![Common ground](../outputs/figures/ext_s4_common_ground.png)
+
+The idea comes from a Kaggle notebook's charts. That notebook uses a **synthetic** dataset, so only the approach is reused here, on our real core sample (6,222 dates, 452 people).
+
+| Measure | Match rate, lowest to highest band | Within-rater slope (pp match per SD) |
+|---|---|---|
+| Felt shared interests (rated after the date) | 5% → 35% | +12.9 (CI 11.5 to 14.3) |
+| Actual hobby overlap (measured before) | 16% → 20% | +1.1 (CI 0.1 to 2.2), p=.035, adjusted .052 |
+| Age gap | 20% (0-2 yrs) → 9% (over 10) | -2.5 (CI -3.5 to -1.5) |
+| Same race | 18% vs 18% | +0.9 (CI -0.2 to 2.0) |
+
+- **Result:** people match when they *feel* they have things in common. Actual hobby overlap barely moves the match rate, and is not significant after correcting for multiple tests. N2 agrees: hobby similarity adds about +0.4 pp once ratings are included.
+- **Marketing use:** create the feeling of common ground, for example with conversation prompts, icebreakers and shared-interest profile fields. Don't expect hobby-overlap filters to raise matches. Age gap is a modest real signal, and apps already filter on it.
+- **Caveats:** felt shared interests is rated after the date, so an app can't see it beforehand, and it partly reflects overall liking (a halo). The point is the contrast with the measured overlap, not a causal effect.
+- **Files:** `ext_s4_common_ground.csv`, `ext_s4_common_ground_slopes.csv`.
 
 ## 5. Robustness
 
@@ -262,10 +292,10 @@ Reading the summary: `A` is core, `S` supporting, `R` robustness, `N` not recomm
 |---|---|
 | `src/ext_features.py` | Shared sample, features, model fitting and statistics. **Read its opening note before changing a ranking feature** |
 | `src/ext_survey.py` | A1, A2, A4, S1, R1 to R6, N1 to N5, N8, N9 |
-| `src/ext_market.py` | A3, A5, A6, S2, S3, N6, N7 |
+| `src/ext_market.py` | A3, A5 (including A5j, A5k), A6, S2, S3, S4, N6, N7 |
 | `src/ext_figures.py` | All charts |
 | `src/extended_analysis.py` | Runner, summary table, tiers and question wording |
-| `tests/test_extended.py` | 18 checks on the sample, leakage, placebo and matching |
+| `tests/test_extended.py` | 23 checks on the sample, leakage, placebo, matching, endings, the direct match model and S4 bands |
 
 ### Change something
 
