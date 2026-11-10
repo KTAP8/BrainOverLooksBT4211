@@ -1,11 +1,22 @@
 # Slides 8a–10 (Person 6) — draft content
 
-## Canva deck version (pages 19–24, current)
+## Canva deck version (pages 20–26, current)
 
-Built in the team Canva deck with one hero number per slide. Visuals are generated from the tables by `python -m src.deck_visuals` (`outputs/figures/deck_*.png`); they use sand for survey and orange for behaviour to sit on the maroon deck. The sections below are the supporting detail and backup.
+These are built in the team Canva deck with one hero number per slide. Each layout is a full-slide illustration made by `python -m src.deck_visuals` (`outputs/figures/deck_full_*.png`). The title, hero number, headline and pill are the deck's own text boxes on top. The spoken script is in `person6_presentation_script.md`, and it matches the Canva speaker notes.
 
 | Page | Slide | Pill | Title (serif) | Hero (serif) | Headline | Visual |
 |---|---|---|---|---|---|---|
+| 20 | 8a | The ranking test | Rank by what people do? | +3 pts | Top-pick yes rate 87% → 90% · best case | `deck_full_8a_ring.png`: ring, 69% same #1 vs 31% changes |
+| 21 | 8b | The twist | When the top pick changes | +10 pts | when they disagree on who goes first, behaviour's pick wins | `deck_full_8b_faceoff.png`: phones, 78% vs 88% |
+| 22 | new | The leak | Most yeses go nowhere | 61% | of yeses are never returned. A yes isn't a match, and only matches keep users. | `deck_full_8c0_wasted.png`: 100 hearts, fix box 38% → 28% |
+| 23 | 8c | The fix | Rank for both sides | 34% | of top picks become matches when the app ranks for both people, vs 27% on survey weights | `deck_full_8c_race.png`: race lanes, 73% → 57% sticker, beats a direct match model by +4 pts |
+| 24 | 8d | Surveys vs behaviour | Watch, don't ask | 3 > 40 | three speed dates explain 29% of who gets wanted later. 40 sign-up answers explain just 1–10%. | `deck_full_8d_seesaw.png`: see-saw, R² .29 vs .01–.10 |
+| 25 | 9 | Four decisions | Matches pay the bills | — | Ship each as an A/B test | `deck_full_9_flywheel.png`: loop and four decision badges |
+| 26 | 10 | Bottom line | the closing quote | — | Thank you. Questions? | `deck_full_10_poster.png`: "Do this" / "Know the limits" panel |
+
+**Known slide wording issue:** the flywheel's "Users stay" step says "80% vs 90% came back". The measure is actually *answered the next-day survey*. The script says this correctly.
+
+---|---|---|---|---|---|---|
 | 19 | 8a | The ranking test | Rank by what people do? | +3 pts | more yeses on the top pick when the app ranks by behaviour, not the survey | `deck_8a_donut.png`: 1 in 3 see a different #1 |
 | 20 | 8b | The twist | When the top pick changes | +10 pts | when the survey and behaviour disagree on who goes first, behaviour's pick wins | `deck_8b_phones.png`: 78% vs 88% profile cards |
 | 21 | 8c | Swipes ≠ matches | Yeses aren't matches | 34% | of top picks become matches when the app ranks for both people, vs 27% on survey weights | `deck_8c_matches.png`: match-rate bars, 73% → 57% callout |

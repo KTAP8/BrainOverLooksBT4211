@@ -344,37 +344,44 @@ def slide_8c_race():
     """Slots: title top-left (40,40); '34%' right column (1390,250); headline (1395,500)."""
     ranking = table("ext_a5_ranking")
     top3 = ranking[ranking.top_k == 3].set_index("rule")
+    direct = table("ext_a5_direct_vs_two_sided")
+    direct = direct[(direct.seed == 42) & (direct.top_k == 3)].set_index("metric")
+    rates = {rule: (top3.loc[rule, "match_rate"], top3.loc[rule, "yes_rate"]) for rule in top3.index}
+    rates["direct"] = (direct.loc["Match rate", "direct_model"], direct.loc["Yes rate", "direct_model"])
     benefit = table("ext_a5_who_benefits").set_index(["tier", "rule"])
     before = benefit.loc[("Least chosen third", "Stated weights"), "no_match_share"]
     after = benefit.loc[("Least chosen third", "Both likely to say yes"), "no_match_share"]
     lanes = [("Random order", "Random order", MUTED), ("Survey weights", "Stated weights", SAND),
              ("Behaviour weights", "Revealed weights", SAND),
+             ("Optimise for matches", "direct", blend(ORANGE, MAROON, 0.45)),
              ("Rank for both sides", "Both likely to say yes", ORANGE)]
     fig, ax = slide()
-    x0, scale = 420, 21.0
+    x0, scale, step, height = 470, 20.0, 124, 104
     ax.text(60, 215, "MATCH RATE IN EACH PERSON'S TOP 3", color=MUTED, fontsize=16, fontweight="bold",
             va="center")
     for i, (label, rule, colour) in enumerate(lanes):
-        y = 260 + i * 150
-        ax.add_patch(FancyBboxPatch((40, y), 1300, 120, boxstyle="round,pad=0,rounding_size=20",
+        y = 250 + i * step
+        mid = y + height / 2
+        ax.add_patch(FancyBboxPatch((40, y), 1300, height, boxstyle="round,pad=0,rounding_size=20",
                                     facecolor=DEEP, edgecolor="none"))
-        ax.text(70, y + 45, label, color=CREAM, fontsize=22, fontweight="bold" if colour == ORANGE else "normal",
+        ax.text(70, mid - 17, label, color=CREAM, fontsize=20, fontweight="bold" if colour == ORANGE else "normal",
                 va="center")
-        ax.text(70, y + 85, f"yes rate {pct(top3.loc[rule, 'yes_rate'])}", color=MUTED, fontsize=15,
-                va="center")
-        value = top3.loc[rule, "match_rate"]
+        value, yes = rates[rule]
+        prefix = "one model  ·  " if rule == "direct" else ""
+        ax.text(70, mid + 20, f"{prefix}yes rate {pct(yes)}", color=MUTED, fontsize=14, va="center")
         end = x0 + value * 100 * scale
-        ax.add_patch(FancyBboxPatch((x0, y + 32), end - x0, 56, boxstyle="round,pad=0,rounding_size=28",
+        ax.add_patch(FancyBboxPatch((x0, mid - 26), end - x0, 52, boxstyle="round,pad=0,rounding_size=26",
                                     facecolor=colour, edgecolor="none"))
-        ax.add_patch(Circle((end - 28, y + 60), 18, facecolor=MAROON, edgecolor="none"))
-        ax.text(end + 18, y + 60, pct(value), color=ORANGE if colour == ORANGE else CREAM, fontsize=30,
+        ax.add_patch(Circle((end - 26, mid), 16, facecolor=MAROON, edgecolor="none"))
+        ax.text(end + 16, mid, pct(value), color=ORANGE if colour == ORANGE else CREAM, fontsize=28,
                 fontweight="bold", va="center")
         if colour == ORANGE:
-            ax.plot([end + 105, end + 105], [y + 10, y + 110], color=CREAM, linewidth=3)
-            ax.add_patch(Polygon([(end + 105, y + 10), (end + 160, y + 28), (end + 105, y + 46)],
+            ax.plot([end + 100, end + 100], [y + 8, y + height - 8], color=CREAM, linewidth=3)
+            ax.add_patch(Polygon([(end + 100, y + 8), (end + 152, y + 25), (end + 100, y + 42)],
                                  facecolor=ORANGE))
+    bottom = 250 + len(lanes) * step
     for x in range(int(x0), int(x0 + 40 * scale) + 1, int(10 * scale)):
-        ax.plot([x, x], [250, 860], color=CREAM, alpha=0.12, linewidth=1.5, linestyle=(0, (6, 8)))
+        ax.plot([x, x], [240, bottom], color=CREAM, alpha=0.12, linewidth=1.5, linestyle=(0, (6, 8)))
     # sticker
     cx, cy = 1630, 870
     ax.add_patch(Circle((cx, cy), 140, facecolor=ORANGE, edgecolor=CREAM, linewidth=4))
@@ -383,9 +390,69 @@ def slide_8c_race():
         (tx, ty), = rotate([(cx, cy + dy)], cx, cy, -10)
         ax.text(tx, ty, text, color=MAROON, fontsize=size, fontweight=weight, ha="center", va="center",
                 rotation=10)
-    ax.text(60, 1035, "Pre-date info, unseen events  ·  +2.5 to +7.1 pts across tests  ·  costs 3-5 pts "
-            "of yeses  ·  cap mass-likers", color=MUTED, fontsize=14, va="center")
+    ax.text(60, 1035, "Pre-date info, unseen events  ·  both sides beats one match model by +1 to +4 pts "
+            "across 5 splits  ·  costs 3-5 pts of yeses  ·  cap mass-likers", color=MUTED, fontsize=14,
+            va="center")
     save_slide(fig, "8c_race")
+
+
+def blend(colour, background, amount):
+    """Opaque mix, so overlapping shapes don't show seams the way alpha does."""
+    import matplotlib.colors as mc
+    a, b = mc.to_rgb(colour), mc.to_rgb(background)
+    return tuple(amount * x + (1 - amount) * y for x, y in zip(a, b))
+
+
+def heart(ax, cx, cy, colour, size=1.0, alpha=1.0):
+    """Filled heart centred near (cx, cy); size 1 is about 66 px wide."""
+    s = size
+    if alpha < 1:
+        colour, alpha = blend(colour, MAROON, alpha), 1.0
+    for dx in (-15, 15):
+        ax.add_patch(Circle((cx + dx * s, cy - 8 * s), 18 * s, facecolor=colour, edgecolor="none", alpha=alpha))
+    ax.add_patch(Polygon([(cx - 32 * s, cy - 2 * s), (cx + 32 * s, cy - 2 * s), (cx, cy + 34 * s)],
+                         facecolor=colour, edgecolor="none", alpha=alpha))
+
+
+def slide_8c0_wasted():
+    """Slots: title top-left (40,40); '61%' right column (1390,250); headline (1395,480);
+    pill top-right. Every number from ext_a5_endings."""
+    endings = table("ext_a5_endings").set_index("view")
+    unreturned = endings.loc["All dates", "unreturned_yes_share"]
+    n_faded = round(unreturned * 100)
+    before = endings.loc["Top 3: Stated weights", "only_i_said_yes"]
+    after = endings.loc["Top 3: Both likely to say yes", "only_i_said_yes"]
+    men = endings.loc["All dates: men choosing", "unreturned_yes_share"]
+    women = endings.loc["All dates: women choosing", "unreturned_yes_share"]
+    fig, ax = slide()
+    ax.text(60, 215, "EVERY 100 YESES", color=MUTED, fontsize=16, fontweight="bold", va="center")
+    x0, y0, cell = 95, 265, 64
+    for i in range(100):
+        row, col = divmod(i, 10)
+        returned = i < 100 - n_faded
+        heart(ax, x0 + col * cell, y0 + row * cell, ORANGE if returned else SAND, size=0.72,
+              alpha=1.0 if returned else 0.28)
+    legend_x = 790
+    heart(ax, legend_x + 30, 330, ORANGE, size=0.9)
+    ax.text(legend_x + 85, 315, f"{100 - n_faded} came back", color=CREAM, fontsize=30, fontweight="bold",
+            va="center")
+    ax.text(legend_x + 85, 360, "both said yes: a match", color=MUTED, fontsize=18, va="center")
+    heart(ax, legend_x + 30, 500, SAND, size=0.9, alpha=0.28)
+    ax.text(legend_x + 85, 485, f"{n_faded} never returned", color=CREAM, fontsize=30, fontweight="bold",
+            va="center")
+    ax.text(legend_x + 85, 530, "effort with no payoff", color=MUTED, fontsize=18, va="center")
+    # the fix
+    card(ax, legend_x - 10, 640, 520, 240, fill=DEEP, edge=ORANGE, lw=2.5, radius=26)
+    ax.text(legend_x + 20, 685, "THE FIX: RANK FOR BOTH SIDES", color=ORANGE, fontsize=15, fontweight="bold",
+            va="center")
+    ax.text(legend_x + 20, 730, "top-3 slots where only you said yes", color=MUTED, fontsize=16, va="center")
+    ax.text(legend_x + 20, 800, f"{pct(before)} {ARROW} {pct(after)}", color=CREAM, fontsize=48,
+            fontweight="bold", va="center")
+    ax.text(legend_x + 20, 852, "survey weights  vs  both sides", color=MUTED, fontsize=15, va="center")
+    ax.text(60, 1035, f"All {int(endings.loc['All dates', 'count']):,} dates  ·  men's yeses {pct(men)} unreturned, "
+            f"women's {pct(women)}  ·  top 3: pre-date info, unseen events", color=MUTED, fontsize=14,
+            va="center")
+    save_slide(fig, "8c0_wasted")
 
 
 def slide_8d_seesaw():
@@ -510,7 +577,7 @@ def slide_10_poster():
 def main():
     FIGURES.mkdir(parents=True, exist_ok=True)
     for build in (ranking_donut, twist_phones, match_bars, survey_vs_dates, revenue_chain,
-                  decision_tiles, slide_8a_ring, slide_8b_faceoff, slide_8c_race, slide_8d_seesaw,
+                  decision_tiles, slide_8a_ring, slide_8b_faceoff, slide_8c0_wasted, slide_8c_race, slide_8d_seesaw,
                   slide_9_flywheel, slide_10_poster):
         build()
     print("Wrote outputs/figures/deck_*.png")
