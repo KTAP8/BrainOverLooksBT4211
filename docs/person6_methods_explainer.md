@@ -308,6 +308,9 @@ The step from matches to retention to subscription revenue is an industry assump
 - **Halo effect?** Using other people's ratings, attractiveness stays top.
 - **Why not just predict matches directly?** We tried it. One model trained on matches, using the same facts, gets 30% top-3 matches. Ranking on both sides' yes gets 34% (+4.0 pp, CI 2.4 to 5.5; +1.2 to +4.0 across five splits).
 - **How much interest is wasted?** Half of all dates are one-sided, and 61% of yeses are never returned. Ranking for both sides cuts unreturned yeses in the top 3 from 38% to 28%.
+- **Does model B check whether you meet the partner's preferences?** We tested it as a mirror of model A: the partner's weights × how others rated you. It adds about one point at most (+1.4 pp with their stated weights, +0.7 pp with weights from their own choices; side test, A5l). Their pickiness already explains most of their yes, and about 15 dates are too few to learn one person's taste.
+- **Isn't revealed better only with lots of data?** Partly. Everyone's pooled revealed weights predict *each person's own* held-out choices better than that person's survey: AUC .76 vs .73 before the date, .90 vs .88 after (A5m). But weights learned from one person's own dates don't catch up within 12 dates. So start from everyone's behaviour and blend in personal choices slowly.
+- **Would the partner's behaviour beat their survey with more data?** We tested it: learning each partner's taste from 2 up to 12 of their dates never beat their survey on top-3 matches (−0.2 to −1.5 pts, no steady trend; A5n). One evening isn't enough to learn one person's taste, so use their survey first and switch to behaviour as it builds up.
 - **Should apps match on shared hobbies?** No. The feeling of shared interests goes with a 5% → 35% match rate, but actual hobby overlap only 16% → 20%. Build prompts, not filters.
 
 ## 13. Lines cut from the script

@@ -1,0 +1,57 @@
+version,line,n,auc,ci_low,ci_high,minus_stated_pp,gap_ci_low,gap_ci_high,gap_p,people
+Pre-date (others' ratings),Personal revealed,2,0.749472,0.728689,0.770813,1.672565,0.254239,3.134571,0.017,200
+Pre-date (others' ratings),Personal revealed,3,0.741025,0.720911,0.761888,0.827901,-0.546772,2.23506,0.239,200
+Pre-date (others' ratings),Personal revealed,4,0.7373,0.716318,0.759329,0.455362,-0.958008,1.867971,0.527,200
+Pre-date (others' ratings),Personal revealed,6,0.7302,0.708069,0.752856,-0.254609,-1.711871,1.336772,0.773,200
+Pre-date (others' ratings),Personal revealed,8,0.734008,0.710374,0.75622,0.126235,-1.482106,1.877251,0.877,200
+Pre-date (others' ratings),Personal revealed,10,0.731394,0.707604,0.753933,-0.135197,-1.775194,1.717957,0.899,200
+Pre-date (others' ratings),Personal revealed,12,0.734879,0.711436,0.758659,0.21329,-1.574523,2.09108,0.785,200
+Pre-date (others' ratings),Stated (their survey),2,0.732746,0.71148,0.752775,0.0,0.0,0.0,1.0,200
+Pre-date (others' ratings),Stated (their survey),3,0.732746,0.71148,0.752775,0.0,0.0,0.0,1.0,200
+Pre-date (others' ratings),Stated (their survey),4,0.732746,0.71148,0.752775,0.0,0.0,0.0,1.0,200
+Pre-date (others' ratings),Stated (their survey),6,0.732746,0.71148,0.752775,0.0,0.0,0.0,1.0,200
+Pre-date (others' ratings),Stated (their survey),8,0.732746,0.71148,0.752775,0.0,0.0,0.0,1.0,200
+Pre-date (others' ratings),Stated (their survey),10,0.732746,0.71148,0.752775,0.0,0.0,0.0,1.0,200
+Pre-date (others' ratings),Stated (their survey),12,0.732746,0.71148,0.752775,0.0,0.0,0.0,1.0,200
+Pre-date (others' ratings),Pooled revealed (everyone),2,0.762903,0.741935,0.783477,3.015744,1.654128,4.471662,0.001,200
+Pre-date (others' ratings),Pooled revealed (everyone),3,0.762903,0.741935,0.783477,3.015744,1.654128,4.471662,0.001,200
+Pre-date (others' ratings),Pooled revealed (everyone),4,0.762903,0.741935,0.783477,3.015744,1.654128,4.471662,0.001,200
+Pre-date (others' ratings),Pooled revealed (everyone),6,0.762903,0.741935,0.783477,3.015744,1.654128,4.471662,0.001,200
+Pre-date (others' ratings),Pooled revealed (everyone),8,0.762903,0.741935,0.783477,3.015744,1.654128,4.471662,0.001,200
+Pre-date (others' ratings),Pooled revealed (everyone),10,0.762903,0.741935,0.783477,3.015744,1.654128,4.471662,0.001,200
+Pre-date (others' ratings),Pooled revealed (everyone),12,0.762903,0.741935,0.783477,3.015744,1.654128,4.471662,0.001,200
+Pre-date (others' ratings),"Personal revealed, unshrunk",2,0.6158,0.597041,0.635136,-11.694625,-13.840531,-9.547226,0.001,200
+Pre-date (others' ratings),"Personal revealed, unshrunk",3,0.615367,0.595304,0.633156,-11.73793,-13.903036,-9.588349,0.001,200
+Pre-date (others' ratings),"Personal revealed, unshrunk",4,0.618815,0.597119,0.639682,-11.39309,-13.662181,-9.207154,0.001,200
+Pre-date (others' ratings),"Personal revealed, unshrunk",6,0.616105,0.594227,0.638807,-11.664048,-14.141792,-9.175089,0.001,200
+Pre-date (others' ratings),"Personal revealed, unshrunk",8,0.624489,0.6007,0.648767,-10.825658,-13.373583,-8.386208,0.001,200
+Pre-date (others' ratings),"Personal revealed, unshrunk",10,0.626942,0.60233,0.651029,-10.580384,-13.142258,-8.254216,0.001,200
+Pre-date (others' ratings),"Personal revealed, unshrunk",12,0.636325,0.610555,0.661619,-9.642137,-12.3111,-7.0346,0.001,200
+"Post-date (own ratings, as in 8a)",Personal revealed,2,0.891984,0.876542,0.905618,1.446486,0.331906,2.561785,0.013,200
+"Post-date (own ratings, as in 8a)",Personal revealed,3,0.883285,0.867916,0.897696,0.576516,-0.581175,1.698974,0.349,200
+"Post-date (own ratings, as in 8a)",Personal revealed,4,0.878766,0.862553,0.894263,0.124628,-1.195861,1.291303,0.851,200
+"Post-date (own ratings, as in 8a)",Personal revealed,6,0.868525,0.848535,0.88635,-0.89945,-2.536186,0.542518,0.249,200
+"Post-date (own ratings, as in 8a)",Personal revealed,8,0.863552,0.842102,0.882309,-1.39673,-3.144867,0.192537,0.089,200
+"Post-date (own ratings, as in 8a)",Personal revealed,10,0.855967,0.831581,0.876809,-2.155187,-4.05851,-0.315486,0.015,200
+"Post-date (own ratings, as in 8a)",Personal revealed,12,0.853924,0.827217,0.876172,-2.359563,-4.470248,-0.422097,0.011,200
+"Post-date (own ratings, as in 8a)",Stated (their survey),2,0.877519,0.860276,0.892539,0.0,0.0,0.0,1.0,200
+"Post-date (own ratings, as in 8a)",Stated (their survey),3,0.877519,0.860276,0.892539,0.0,0.0,0.0,1.0,200
+"Post-date (own ratings, as in 8a)",Stated (their survey),4,0.877519,0.860276,0.892539,0.0,0.0,0.0,1.0,200
+"Post-date (own ratings, as in 8a)",Stated (their survey),6,0.877519,0.860276,0.892539,0.0,0.0,0.0,1.0,200
+"Post-date (own ratings, as in 8a)",Stated (their survey),8,0.877519,0.860276,0.892539,0.0,0.0,0.0,1.0,200
+"Post-date (own ratings, as in 8a)",Stated (their survey),10,0.877519,0.860276,0.892539,0.0,0.0,0.0,1.0,200
+"Post-date (own ratings, as in 8a)",Stated (their survey),12,0.877519,0.860276,0.892539,0.0,0.0,0.0,1.0,200
+"Post-date (own ratings, as in 8a)",Pooled revealed (everyone),2,0.903892,0.889128,0.916811,2.637273,1.565142,3.761204,0.001,200
+"Post-date (own ratings, as in 8a)",Pooled revealed (everyone),3,0.903892,0.889128,0.916811,2.637273,1.565142,3.761204,0.001,200
+"Post-date (own ratings, as in 8a)",Pooled revealed (everyone),4,0.903892,0.889128,0.916811,2.637273,1.565142,3.761204,0.001,200
+"Post-date (own ratings, as in 8a)",Pooled revealed (everyone),6,0.903892,0.889128,0.916811,2.637273,1.565142,3.761204,0.001,200
+"Post-date (own ratings, as in 8a)",Pooled revealed (everyone),8,0.903892,0.889128,0.916811,2.637273,1.565142,3.761204,0.001,200
+"Post-date (own ratings, as in 8a)",Pooled revealed (everyone),10,0.903892,0.889128,0.916811,2.637273,1.565142,3.761204,0.001,200
+"Post-date (own ratings, as in 8a)",Pooled revealed (everyone),12,0.903892,0.889128,0.916811,2.637273,1.565142,3.761204,0.001,200
+"Post-date (own ratings, as in 8a)","Personal revealed, unshrunk",2,0.815996,0.795201,0.83465,-6.152285,-7.758678,-4.667998,0.001,200
+"Post-date (own ratings, as in 8a)","Personal revealed, unshrunk",3,0.797676,0.775573,0.818475,-7.98432,-9.833903,-6.238152,0.001,200
+"Post-date (own ratings, as in 8a)","Personal revealed, unshrunk",4,0.787726,0.76368,0.809971,-8.979347,-10.844716,-7.204803,0.001,200
+"Post-date (own ratings, as in 8a)","Personal revealed, unshrunk",6,0.759146,0.729849,0.786068,-11.837303,-14.08146,-9.759502,0.001,200
+"Post-date (own ratings, as in 8a)","Personal revealed, unshrunk",8,0.728909,0.698734,0.756312,-14.861052,-17.505171,-12.445115,0.001,200
+"Post-date (own ratings, as in 8a)","Personal revealed, unshrunk",10,0.706698,0.672751,0.737497,-17.082113,-20.009595,-14.509108,0.001,200
+"Post-date (own ratings, as in 8a)","Personal revealed, unshrunk",12,0.698407,0.661683,0.732804,-17.911232,-21.163073,-15.080333,0.001,200

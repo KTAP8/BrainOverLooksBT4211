@@ -216,6 +216,124 @@ def add_split_fold(data, seed=SEED):
     return out
 
 
+YOU_SF = [f"you_{a}" for a in ATTRS]
+PERSONAL = [f"w_{a}" for a in ATTRS]
+
+
+def add_reverse_ratings(frame):
+    """How others rated the chooser: `you_*`, one value per chooser.
+
+    It is constant across the chooser's list, so although it averages every
+    partner's rating, it cannot reorder that list. A version that varies by
+    partner fails the module rule: taking i's mean from the fold opposite to
+    partner j makes it anti-correlated with j's yes (the excluded fold is the
+    one whose ratings, and yeses, share j's), and it ranked below random.
+    """
+    means = frame.groupby("pid")[list(ATTRS)].mean()
+    out = frame.copy()
+    for attribute, column in zip(ATTRS, YOU_SF):
+        out[column] = out["iid"].map(means[attribute])
+        out[column] = out[column].fillna(out[column].median())
+    return out
+
+
+@njit(cache=True)
+def _shrunk_logit(x, y, prior, lam, steps=25):
+    """Logit with a free intercept; slopes penalised towards `prior`."""
+    k = x.shape[1]
+    beta = np.zeros(k + 1)
+    beta[1:] = prior
+    rate = min(max(y.mean(), 0.02), 0.98)
+    beta[0] = np.log(rate / (1 - rate))
+    z = np.ones((x.shape[0], k + 1))
+    z[:, 1:] = x
+    for _ in range(steps):
+        p = 1 / (1 + np.exp(-(z @ beta)))
+        grad = z.T @ (y - p)
+        grad[1:] -= lam * (beta[1:] - prior)
+        grad[0] -= 1e-2 * beta[0]
+        hess = (z * (p * (1 - p))[:, None]).T @ z
+        for d in range(1, k + 1):
+            hess[d, d] += lam
+        hess[0, 0] += 1e-2
+        beta = beta + np.linalg.solve(hess, grad)
+    return beta[1:]
+
+
+@njit(cache=True)
+def _auc(scores, y):
+    """Mann-Whitney AUC with ties counted half; nan without both classes."""
+    pos, neg, total = 0, 0, 0.0
+    for a in range(len(y)):
+        if y[a] == 1:
+            pos += 1
+        else:
+            neg += 1
+    if pos == 0 or neg == 0:
+        return np.nan
+    for a in range(len(y)):
+        if y[a] == 1:
+            for b in range(len(y)):
+                if y[b] == 0:
+                    total += 1.0 if scores[a] > scores[b] else (0.5 if scores[a] == scores[b] else 0.0)
+    return total / (pos * neg)
+
+
+@njit(cache=True)
+def learning_draws(x, y, stated, prior, lam, n, test_size, draws, seed):
+    """A5m: per draw, hold out `test_size` dates and learn on n of the rest.
+
+    One model per draw scores every held-out date, so no held-out label can
+    tilt its own score (the leave-one-out trap in the module note). The
+    held-out set depends only on (seed, draw), so it is the same for every n,
+    and stated and pooled weights are scored on exactly the same dates.
+    Returns (draws, 3) AUCs: personal, stated, pooled (nan if one class).
+    """
+    rows = x.shape[0]
+    out = np.full((draws, 3), np.nan)
+    for d in range(draws):
+        np.random.seed(seed + d)
+        order = np.random.permutation(rows)
+        test = order[:test_size]
+        np.random.seed(seed + d + 7919 * (n + 1))
+        pick = np.random.permutation(order[test_size:])[:n]
+        w = _shrunk_logit(np.ascontiguousarray(x[pick]), y[pick], prior, lam)
+        xt, yt = x[test], y[test]
+        out[d, 0] = _auc(xt @ w, yt)
+        out[d, 1] = _auc(stated[test], yt)
+        out[d, 2] = _auc(xt @ prior, yt)
+    return out
+
+
+def personal_weights(rows, prior, mean, sd, lam=1.0, n=None, seed=SEED):
+    """Each chooser's own trait weights, leaving out one partner at a time.
+
+    With `n`, each fit uses a random n of the chooser's other rows (all of
+    them if fewer remain), for the A5n learning curve.
+
+    `rows` are one gender's decisions (iid = chooser j, pid = person k), with
+    k described by `sf_*`. For every row (j, k) this returns j's weights fitted
+    on j's other rows only, so j's decision about k never enters. Slopes are
+    shrunk towards the pooled weights `prior` (about 15 dates per person).
+    Returns a frame keyed by chooser `iid` and the left-out `pid`.
+    """
+    rows = rows.dropna(subset=[*SPLIT_FOLD, "dec"])
+    prior = np.asarray(prior, float)
+    rng = np.random.default_rng(seed)
+    out = []
+    for chooser, group in rows.groupby("iid", sort=False):
+        x = ((group[SPLIT_FOLD].to_numpy(float) - mean) / sd)
+        y = group["dec"].to_numpy(float)
+        everyone = np.arange(len(y))
+        for index in range(len(y)):
+            others = everyone[everyone != index]
+            if n is not None and len(others) > n:
+                others = rng.choice(others, n, replace=False)
+            out.append(_shrunk_logit(np.ascontiguousarray(x[others]), y[others], prior, lam))
+    weights = pd.DataFrame(np.vstack(out) if out else np.empty((0, len(ATTRS))), columns=PERSONAL)
+    return pd.concat([rows[["iid", "pid"]].reset_index(drop=True), weights], axis=1)
+
+
 def split_history(data):
     """Early speed dates become history; later pairs are candidates.
 

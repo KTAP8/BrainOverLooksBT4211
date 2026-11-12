@@ -370,8 +370,92 @@ def common_ground(tables):
     _save(fig, "ext_s4_common_ground.png")
 
 
+def learning_curve(tables):
+    """A5m: weights learned from one person's own dates vs their survey."""
+    table = tables["a5_learning_curve"]
+    versions = list(dict.fromkeys(table["version"]))
+    fig, axes = plt.subplots(1, len(versions), figsize=(12.5, 4.2))
+    styles = {"Pooled revealed (everyone)": (REVEALED_COLOR, "-", 2.2, "Everyone's revealed weights"),
+              "Stated (their survey)": (STATED_COLOR, "-", 2.2, "Their own survey"),
+              "Personal revealed": (INK, "-", 1.8, "Their own choices, pulled to everyone's"),
+              "Personal revealed, unshrunk": (NEUTRAL, "--", 1.5, "Their own choices only")}
+    for ax, version in zip(axes, versions):
+        part = table[table["version"] == version]
+        labels = []
+        for line, (colour, dash, width, label) in styles.items():
+            rows = part[part["line"] == line].sort_values("n")
+            ax.plot(rows["n"], rows["auc"], color=colour, ls=dash, lw=width,
+                    marker="o" if line.startswith("Personal") else None, ms=4)
+            ax.fill_between(rows["n"], rows["ci_low"], rows["ci_high"], color=colour, alpha=0.10,
+                            lw=0)
+            labels.append([rows["auc"].iloc[-1], f"{label}  {rows['auc'].iloc[-1]:.2f}",
+                           colour if colour != NEUTRAL else MUTED])
+        # Spread end labels so none overlap (min gap in data units).
+        span = part["ci_high"].max() - part["ci_low"].min()
+        gap = span * 0.07
+        labels.sort(key=lambda item: item[0])
+        for lower, upper in zip(labels, labels[1:]):
+            upper[0] = max(upper[0], lower[0] + gap)
+        for y, text, colour in labels:
+            ax.text(12.3, y, text, color=colour, fontsize=8.5, va="center")
+        ax.set_title(version, loc="left", fontsize=10.5)
+        ax.set_xlabel("Dates used to learn this person's own weights")
+        ax.set_xlim(1.5, 21)
+        ax.set_xticks(sorted(part["n"].unique()))
+        ax.grid(axis="y", color=GRID, linewidth=0.8)
+        ax.set_axisbelow(True)
+    axes[0].set_ylabel("AUC on held-out dates\n(0.5 = guessing)")
+    _title(fig, "Everyone's behaviour predicts your choices better than your own survey",
+           "200 people with 16+ dates. Each draw holds out 4 dates and learns from n others; 50 draws, "
+           "95% intervals resample people.\nOne person's own weights don't catch up within 12 dates: "
+           "too little behaviour per person.", top=1.06)
+    _save(fig, "ext_a5_learning_curve.png")
+
+
+def partner_learning(tables):
+    """A5n: B2 (partner's revealed taste from n dates) minus B1 (their survey)."""
+    if "a5_partner_learning" not in tables:
+        return
+    table = tables["a5_partner_learning"]
+    subsets = ["Full-data lists", "All lists"]
+    fig, axes = plt.subplots(1, 2, figsize=(12.5, 4.2), sharey=True)
+    for ax, subset in zip(axes, subsets):
+        part = table[table["subset"] == subset]
+        current = part[part["model"] == "Current B"].iloc[0]
+        ax.hlines(0, 2, 12, color=STATED_COLOR, lw=2.2)
+        ax.hlines(current.minus_b1_pp, 2, 12, color=NEUTRAL, lw=1.3, ls=":")
+        labels = [[0.0, "B1: their survey (zero line)", STATED_COLOR],
+                  [current.minus_b1_pp, f"Current B, no fit  {current.minus_b1_pp:+.1f}", MUTED]]
+        for lam, colour, dash, label in ((1.0, REVEALED_COLOR, "-", "B2: their behaviour"),
+                                         (0.3, INK, "--", "B2, trusting their data more")):
+            rows = part[part["lam"] == lam].sort_values("partner_dates")
+            ax.plot(rows["partner_dates"], rows["minus_b1_pp"], color=colour, ls=dash, lw=2,
+                    marker="o", ms=4)
+            ax.fill_between(rows["partner_dates"], rows["ci_low"], rows["ci_high"], color=colour,
+                            alpha=0.10, lw=0)
+            labels.append([rows["minus_b1_pp"].iloc[-1],
+                           f"{label}  {rows['minus_b1_pp'].iloc[-1]:+.1f}", colour])
+        labels.sort(key=lambda item: item[0])
+        for lower, upper in zip(labels, labels[1:]):
+            upper[0] = max(upper[0], lower[0] + 0.2)
+        for y, text, colour in labels:
+            ax.text(12.4, y, text, color=colour, fontsize=8.5, va="center")
+        ax.set_title(f"{subset} ({int(part['people'].iloc[0])} people)", loc="left", fontsize=10.5)
+        ax.set_xlabel("Partner's dates used to learn their taste")
+        ax.set_xlim(1.5, 19.5)
+        ax.set_xticks(sorted(part["partner_dates"].dropna().unique()))
+        ax.grid(axis="y", color=GRID, linewidth=0.8)
+        ax.set_axisbelow(True)
+    axes[0].set_ylabel("Top-3 match rate vs B1\n(percentage points)")
+    _title(fig, "Does learning the partner's taste from their behaviour catch up with their survey?",
+           "Model A pooled throughout. 3 splits x 3 draws, 95% intervals resample people. "
+           "Full-data lists: the typical partner has more than 12 dates.", top=1.06)
+    _save(fig, "ext_a5_partner_learning.png")
+
+
 def make_all(tables, summary=None):
     _style()
     for chart in (survey_wording, survey_vs_behaviour, calibration, beliefs, yes_vs_match, funnel,
-                  variance, perceptual_map, contrast, market, robustness, endings, common_ground):
+                  variance, perceptual_map, contrast, market, robustness, endings, common_ground,
+                  learning_curve, partner_learning):
         chart(tables)

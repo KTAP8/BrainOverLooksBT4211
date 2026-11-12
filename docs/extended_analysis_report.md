@@ -142,7 +142,95 @@ Random order is one random draw; each person's true average is 45% yes and 18% m
 - **Likely reason (not tested directly):** a match needs two separate yeses. Modelling each side learns from every yes and no, whereas a single match model learns only from the rarer combined outcome.
 - **Is a match harder to rank than a yes?** Within each person's list, ROC-AUC is .71 for matches (two-sided rule) and .76 for own yeses (revealed + pair facts). Average precision for matches is .55 against a 21% base rate. Stated and revealed weights rank matches equally well (.63 each), consistent with A5b.
 - **Method note:** the metrics are scored within each person's list, because that's all a ranking uses. Pooled metrics would reward knowing who says yes to everyone. PR-AUC follows the Kaggle notebook's suggestion for a rare outcome.
-- **Files:** `ext_a5_ranking.csv`, `ext_a5_lifts.csv`, `ext_a5_seed_sensitivity.csv`, `ext_a5_history_design.csv`, `ext_a5_partner_model.csv`, `ext_a5_who_benefits.csv`, `ext_a5_exposure.csv`, `ext_a5_funnel.csv`, `ext_a5_endings.csv`, `ext_a5_direct_vs_two_sided.csv`, `ext_a5_rank_quality.csv`.
+**A5l. Should model B mirror model A?** (side test; the headline stays on the current B)
+
+Model A asks "do they have what *you* value?" (their traits as others rated them × learned weights). The mirror for B asks "do *you* have what *they* value?"
+
+**Inputs (B1 and B2 only):**
+- the partner's yes rate,
+- the pair facts,
+- a **fit score**: the partner's weights × how others rated you.
+
+**The two versions:**
+- **B1:** the partner's stated survey points.
+- **B2:** the partner's *revealed* weights, from a logit on their other dates.
+  - The date with you is left out.
+  - The weights are shrunk towards the pooled weights (λ = 1), because each person has about 15 dates.
+
+**Results:**
+- **About +1 pp at most.**
+  - B1: +1.4 pp on average (+0.3 to +1.7 across five splits; four of five individually above zero).
+  - B2: +0.7 pp (+0.1 to +1.9; one of five above zero).
+  - Adding the fit score to the current B gives the same picture.
+- **Revealed weights don't beat stated ones at the individual level.** Partner-yes AUC within lists is .74 (current B), .75 (B1) and .73 (B2). More shrinkage helps B2 (λ = 3: +1.0 pp; λ = 0.3: +0.4 pp), so the per-person weights are mostly noise.
+- **Placebo:** on the main split, shuffling the fit score within each list does as well as the real one (B1 +0.8 vs +0.3). So any gain is small and not reliably attributable to the fit itself.
+- **Leakage note:**
+  - **Your ratings** are one value per person (your mean rating from everyone). They're constant across your list, so they can't reorder it.
+  - **A first version** took your rating from the fold opposite each partner instead. It ranked *below* random (AUC .47), the fold artefact described in `ext_features.py`, and was dropped.
+  - **The partner's weights** never use their decision about you (tested).
+- **Reading:** the partner's pickiness already captures most of what predicts their yes. Matching on their personal taste adds little with the data an app has after one evening.
+
+**A5m. Would more behaviour per person make revealed weights beat the survey? (learning curve)**
+
+**Setup:**
+- **People:** 200 people with at least 16 dates.
+- **Each draw:** hold out 4 of a person's dates and predict their yes/no on them, with weights learned from n of their *other* dates (n = 2 to 12).
+- **Repeats:** 50 draws per person.
+
+**Four predictors, scored on the same held-out dates:**
+- **Their own survey points.**
+- **Everyone's revealed weights,** from the other events.
+- **Their own weights, pulled towards everyone's** (shrinkage λ = 1).
+- **Their own weights alone** (almost unshrunk).
+
+**Two versions:**
+- **Pre-date:** the partner is described by others' ratings.
+- **Post-date:** the chooser's own ratings, as in 8a.
+
+**Results:**
+- **Everyone's revealed weights predict a person's own choices better than that person's own survey.**
+  - Pre-date: AUC .763 vs .733, +3.0 pts (CI 1.7 to 4.5).
+  - Post-date: .904 vs .878, +2.6 pts (CI 1.6 to 3.8).
+  - This is the person-level version of the headline: behaviour beats what you say, even about you.
+- **One person's own weights don't catch up within 12 dates.**
+  - Pulled towards everyone's, they start near the pooled line and slide to survey level as their own data gets more say (pre-date .749 → .735; post-date .892 → .854).
+  - Alone, they sit far below (pre-date .62 → .64; post-date .82 → .70).
+- **The trend is weak.**
+  - The pre-date, own-weights-only curve rises about 0.002 AUC per date. Taken at face value, it would reach survey level at about 60 dates, far outside our data. Treat that as a projection only.
+  - The post-date own-only curve *falls*. With their own post-date ratings, a few dates often separate yes from no perfectly, and unpenalised weights overfit.
+- **First version discarded:** each held-out date had its own model, trained on all the others. That curve fell with n, a leave-one-out artefact, so it was replaced by one model per draw.
+- **Reading:** an app should use everyone's behaviour from day one and blend in a person's own choices slowly. Personal taste needs far more than one evening of dates.
+- **Files:** `ext_a5_learning_curve.csv`, `ext_a5_learning_projection.csv`, `ext_a5_partner_learning.csv`. **Figure:** `ext_a5_learning_curve.png`.
+
+**A5n. Does B2 catch up with B1 if we learn the partner's taste from more of their dates? (learning curve on matches)**
+
+**Setup:**
+- **Model A:** pooled throughout.
+- **B2:** each partner's revealed weights are learned from n of their other dates (n = 2 to 12), never their date with this chooser.
+- **Outcome:** top-3 match rate vs B1 (their stated weights × your ratings).
+- **Repeats:** 3 splits × 3 random draws of dates, averaged per person.
+- **People:**
+  - "Full-data lists": the typical partner has more than 12 dates, 320 people.
+  - All lists: 452 people. Requiring *every* partner to have 12+ dates leaves only 21 people.
+
+**Results:**
+- **B2 never catches B1.** Full-data lists: −0.5 pp at 2 dates, −1.5 at 4, −0.2 at 8, −0.7 at 12. All lists: −0.5, −1.3, −0.6, −1.0. Below zero at every n, and none of the late gaps is clearly different from zero.
+- **No steady trend.**
+  - At 2 dates B2 is close to B1, because shrinkage keeps the weights near pooled.
+  - At 4 dates it's worst, as noisy personal weights take over.
+  - It partly recovers by 8 to 12 dates.
+  - A straight-line projection isn't meaningful for this shape.
+- **Trusting their data more (λ = 0.3)** gives the same picture.
+- **Partner-yes AUC:** .72 to .73 for B2 at every n, vs .74 for B1.
+
+**Reading:**
+- Within the 12 or so dates a speed-dating partner has, their behaviour doesn't reveal their personal taste better than their survey.
+- Whether it would with far more data can't be tested here.
+- Matches with A5l and A5m: pooled behaviour beats surveys, but personal behaviour needs more than one evening.
+
+**Files:** `ext_a5_partner_learning.csv`. **Figure:** `ext_a5_partner_learning.png`.
+
+- **Files:** `ext_a5_ranking.csv`, `ext_a5_lifts.csv`, `ext_a5_seed_sensitivity.csv`, `ext_a5_history_design.csv`, `ext_a5_partner_model.csv`, `ext_a5_who_benefits.csv`, `ext_a5_exposure.csv`, `ext_a5_funnel.csv`, `ext_a5_endings.csv`, `ext_a5_direct_vs_two_sided.csv`, `ext_a5_rank_quality.csv`, `ext_a5_partner_mirror.csv`, `ext_a5_learning_curve.csv`, `ext_a5_learning_projection.csv`.
 
 ### A6. How much can personalisation do?
 
@@ -292,10 +380,10 @@ Reading the summary: `A` is core, `S` supporting, `R` robustness, `N` not recomm
 |---|---|
 | `src/ext_features.py` | Shared sample, features, model fitting and statistics. **Read its opening note before changing a ranking feature** |
 | `src/ext_survey.py` | A1, A2, A4, S1, R1 to R6, N1 to N5, N8, N9 |
-| `src/ext_market.py` | A3, A5 (including A5j, A5k), A6, S2, S3, S4, N6, N7 |
+| `src/ext_market.py` | A3, A5 (including A5j to A5n), A6, S2, S3, S4, N6, N7 |
 | `src/ext_figures.py` | All charts |
 | `src/extended_analysis.py` | Runner, summary table, tiers and question wording |
-| `tests/test_extended.py` | 23 checks on the sample, leakage, placebo, matching, endings, the direct match model and S4 bands |
+| `tests/test_extended.py` | 31 checks on the sample, leakage, placebo, matching, endings, the direct match model, S4 bands, the mirrored partner model and the learning curve |
 
 ### Change something
 

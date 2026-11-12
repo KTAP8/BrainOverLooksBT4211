@@ -20,9 +20,10 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
 from .constants import ATTRS, SEED, STATED
-from .ext_features import (CONSENSUS, GENDERS, HISTORY, PAIR, PARTNER_STATED, SPLIT_FOLD,
-                           add_consensus, add_pair_features, add_split_fold, boot_mean,
-                           core_sample, demean, fit_clogit, make_strata, split_history,
+from .ext_features import (CONSENSUS, GENDERS, HISTORY, PAIR, PARTNER_STATED, PERSONAL,
+                           SPLIT_FOLD, YOU_SF, add_consensus, add_pair_features,
+                           add_reverse_ratings, add_split_fold, boot_mean, core_sample, demean,
+                           fit_clogit, learning_draws, make_strata, personal_weights, split_history,
                            summarise_draws)
 from .ext_survey import finding, ols_cluster
 
@@ -34,6 +35,15 @@ RULE_LABELS = {"random": "Random order", "stated": "Stated weights",
                "revealed": "Revealed weights", "revealed_pair": "Revealed + pair facts",
                "popularity": "Popularity", "partner_only": "Partner likely to say yes",
                "reciprocal": "Both likely to say yes", "direct_match": "One model trained on matches"}
+
+
+MIRRORS = {"mirror_stated": "fit_stated", "mirror_revealed": "fit_revealed",
+           "full_fit_stated": "fit_stated", "full_fit_revealed": "fit_revealed"}
+MIRROR_LABELS = {"full": "B0: current (yes rate, pair facts, stated weights)",
+                 "mirror_stated": "B1: mirror, their stated weights x your ratings",
+                 "mirror_revealed": "B2: mirror, their revealed weights x your ratings",
+                 "full_fit_stated": "B0 + stated fit",
+                 "full_fit_revealed": "B0 + revealed fit"}
 
 
 def top_k(frame, rule, k):
@@ -55,12 +65,20 @@ def partner_features(frame, mode):
     partner: how readily they say yes, plus fit with what they stated.
     """
     x = pd.DataFrame({"int": frame["int_corr"], "age": frame["agegap"], "race": frame["samerace"]})
+    if mode.startswith("mirror"):
+        # A5l: the mirror of model A. Their pickiness, the pair facts, and
+        # how well you score on what this partner weighs.
+        x["j_sel"] = frame["j_sel"]
+        x["fit"] = frame[MIRRORS[mode]]
+        return x.fillna(0)
     for attribute in ATTRS:
         x[attribute] = frame[PARTNER_STATED[attribute]].fillna(16.7) / 100
     if mode == "selectivity_only":
         x = x[[]].copy()
     if mode != "no_selectivity":
         x["j_sel"] = frame["j_sel"]
+    if mode in MIRRORS:
+        x["fit"] = frame[MIRRORS[mode]]
     return x.fillna(0)
 
 
@@ -74,19 +92,60 @@ def match_features(frame):
     return x
 
 
-def ranking_frame(ctx, seed=SEED, mode="full"):
-    """Score each person's list on events the models never saw."""
+def mirror_terms(sample, wave, code, lam=1.0, partner_n=None, draw=0):
+    """Fit of each partner's revealed taste to the chooser's ratings (A5l).
+
+    For choosers of gender `code`, partners are the other gender. Each
+    partner's weights come from their own decisions on everyone except this
+    chooser, shrunk towards pooled weights fitted without `wave`, so no
+    decision or rating from the held-out event steers the training features.
+    """
+    other = 1 - code
+    pool = sample[(sample["wave"] != wave) & (sample["gender"] == other)]
+    prior = fit_clogit(make_strata(pool, SPLIT_FOLD))
+    weights = personal_weights(sample[sample["gender"] == other], prior.beta, prior.mean,
+                               prior.sd, lam, partner_n, seed=1000 * draw + wave)
+    weights = weights.rename(columns={"iid": "pid", "pid": "iid"}).drop_duplicates(["iid", "pid"])
+    rows = sample[sample["gender"] == code][["iid", "pid", *YOU_SF]].merge(
+        weights, on=["iid", "pid"], how="left")
+    for column, value in zip(PERSONAL, prior.beta):
+        rows[column] = rows[column].fillna(value)
+    you = (rows[YOU_SF].to_numpy(float) - prior.mean) / prior.sd
+    return pd.Series((rows[PERSONAL].to_numpy() * you).sum(axis=1),
+                     index=sample.index[sample["gender"] == code])
+
+
+def ranking_frame(ctx, seed=SEED, mode="full", lam=1.0, shuffle_fit=False, partner_n=None,
+                  draw=0):
+    """Score each person's list on events the models never saw.
+
+    Mirror modes (A5l) swap model B for the mirror of model A. `shuffle_fit`
+    permutes the fit term within each test list: a placebo for its value.
+    """
     frame = add_pair_features(add_split_fold(ctx.data, seed))
     sample = core_sample(frame).dropna(subset=SPLIT_FOLD).copy()
     sample["tiebreak"] = np.random.default_rng(seed).random(len(sample))
     sample["random"] = sample["tiebreak"]
+    if mode in MIRRORS:
+        reverse = add_reverse_ratings(frame)[["iid", "pid", *YOU_SF]].drop_duplicates(["iid", "pid"])
+        sample = sample.merge(reverse, on=["iid", "pid"], how="left")
+        stated = sample[[PARTNER_STATED[a] for a in ATTRS]].fillna(16.7).to_numpy() / 100
+        sample["fit_stated"] = (stated * sample[YOU_SF].to_numpy()).sum(axis=1)
     parts = []
     for wave in sorted(sample["wave"].unique()):
         for code, _ in GENDERS:
+            if MIRRORS.get(mode) == "fit_revealed":
+                sample["fit_revealed"] = np.nan
+                sample.loc[sample["gender"] == code, "fit_revealed"] = mirror_terms(
+                    sample, wave, code, lam, partner_n, draw)
             train = sample[(sample["wave"] != wave) & (sample["gender"] == code)]
             test = sample[(sample["wave"] == wave) & (sample["gender"] == code)].copy()
             if test.empty:
                 continue
+            if shuffle_fit and mode in MIRRORS:
+                rng = np.random.default_rng(seed + wave)
+                test[MIRRORS[mode]] = test.groupby("iid")[MIRRORS[mode]].transform(
+                    lambda v: rng.permutation(v.to_numpy()))
             test["stated"] = (test[STATED].to_numpy() * test[SPLIT_FOLD].to_numpy()).sum(axis=1)
             test["post_stated"] = (test[STATED].to_numpy() * test[ATTRS].to_numpy()).sum(axis=1)
             test["post_revealed"] = fit_clogit(make_strata(train, ATTRS)).score(test, ATTRS)
@@ -540,6 +599,236 @@ def a5_metric(ctx):
                             a5_history_design=history_table, a5_funnel=funnel,
                             a5_endings=endings_tbl, a5_direct_vs_two_sided=direct_tbl,
                             a5_rank_quality=quality), rows=rows)
+
+
+def a5l_partner_mirror(ctx):
+    """A5l: does model B gain from checking whether you meet the partner's taste?
+
+    B0 is the published partner model. B1 and B2 mirror model A: the
+    partner's yes rate, pair facts, and a fit score of their weights (stated,
+    or revealed from their other dates) times how others rated you. A side
+    test: the headline A5 numbers stay on B0.
+    """
+    modes = ["full", "mirror_stated", "mirror_revealed", "full_fit_stated", "full_fit_revealed"]
+    rows, scored_main = [], {}
+    for seed in SEEDS:
+        frames = {mode: ranking_frame(ctx, seed, mode) for mode in modes}
+        base = top_k(frames["full"], "reciprocal", 3)
+        for mode, scored in frames.items():
+            top = top_k(scored, "reciprocal", 3)
+            match = paired_lift(top, base, "match", ctx.n_boot)
+            yes = paired_lift(top, base, "dec", ctx.n_boot)
+            rows.append(dict(seed=seed, partner_model=MIRROR_LABELS[mode], lam=1.0,
+                             top3_match=top["match"].mean(), top3_yes=top["dec"].mean(),
+                             partner_yes_auc=_within_person(scored, "partner_only", "dec_o",
+                                                            roc_auc_score).mean(),
+                             match_vs_b0_pp=match["estimate"], ci_low=match["ci_low"],
+                             ci_high=match["ci_high"], p=match["p"],
+                             yes_vs_b0_pp=yes["estimate"], people=len(top)))
+        if seed == SEED:
+            scored_main = frames
+    base = top_k(scored_main["full"], "reciprocal", 3)
+    extra = [(mode, 1.0, True) for mode in modes[1:]]
+    extra += [("mirror_revealed", lam, False) for lam in (0.3, 3.0)]
+    for mode, lam, shuffle in extra:
+        scored = ranking_frame(ctx, SEED, mode, lam=lam, shuffle_fit=shuffle)
+        top = top_k(scored, "reciprocal", 3)
+        match = paired_lift(top, base, "match", ctx.n_boot)
+        label = MIRROR_LABELS[mode] + (" [fit shuffled: placebo]" if shuffle else "")
+        rows.append(dict(seed=SEED, partner_model=label, lam=lam, top3_match=top["match"].mean(),
+                         top3_yes=top["dec"].mean(),
+                         partner_yes_auc=_within_person(scored, "partner_only", "dec_o",
+                                                        roc_auc_score).mean(),
+                         match_vs_b0_pp=match["estimate"], ci_low=match["ci_low"],
+                         ci_high=match["ci_high"], p=match["p"], yes_vs_b0_pp=np.nan,
+                         people=len(top)))
+    table = pd.DataFrame(rows)
+    main = table[(table["seed"] == SEED) & (table["lam"] == 1.0)].set_index("partner_model")
+    spread = table[table["lam"] == 1.0].groupby("partner_model")["match_vs_b0_pp"].agg(
+        ["mean", "min", "max"])
+    b0, b1, b2 = (main.loc[MIRROR_LABELS[m]] for m in ("full", "mirror_stated", "mirror_revealed"))
+    s1, s2 = (spread.loc[MIRROR_LABELS[m]] for m in ("mirror_stated", "mirror_revealed"))
+    row = finding(
+        "A5l", f"Mirroring model A in model B (does the partner's taste fit how others rate you?) "
+               f"adds about a point at most. Top-3 matches vs the current B, mean over five splits: "
+               f"{s1['mean']:+.1f} pp with stated weights ({s1['min']:+.1f} to {s1['max']:+.1f}), "
+               f"{s2['mean']:+.1f} pp with revealed weights ({s2['min']:+.1f} to {s2['max']:+.1f}). "
+               f"Partner-yes AUC {b0.partner_yes_auc:.2f} / {b1.partner_yes_auc:.2f} / "
+               f"{b2.partner_yes_auc:.2f}: one person's ~15 dates are too few to beat their stated "
+               f"weights. Headline A5 stays on the current B",
+        s1["mean"], (s1["min"], s1["max"]), None, "pp match, top 3, B1 minus B0 (range = splits)",
+        f"{int(b1.people)} people", "a5_partner_mirror")
+    return dict(tables=dict(a5_partner_mirror=table), rows=[row])
+
+
+LEARNING_GRID = (2, 3, 4, 6, 8, 10, 12)
+LEARNING_MIN_DATES = 16
+LEARNING_TEST = 4
+LEARNING_VERSIONS = {"Pre-date (others' ratings)": SPLIT_FOLD,
+                     "Post-date (own ratings, as in 8a)": list(ATTRS)}
+
+
+def learning_curve_frame(ctx, draws=50, lam=1.0, grid=LEARNING_GRID):
+    """Per-chooser AUC on held-out dates, by weight source and n training dates.
+
+    Choosers with at least LEARNING_MIN_DATES usable dates, so every n uses
+    the same people and the same held-out dates. Stated: their own sign-up
+    points on raw ratings. Pooled: everyone's revealed weights from the other
+    events. Personal: weights from n of their other dates, shrunk towards
+    pooled (`lam`), or almost unshrunk.
+    """
+    sample = add_split_fold(ctx.data).merge(ctx.sample[["iid", "pid"]].drop_duplicates(),
+                                             on=["iid", "pid"])
+    rows = []
+    for version, columns in LEARNING_VERSIONS.items():
+        usable = sample.dropna(subset=[*columns, "dec", *STATED])
+        counts = usable.groupby("iid")["dec"].transform("size")
+        usable = usable[counts >= LEARNING_MIN_DATES]
+        for code, _ in GENDERS:
+            for wave in sorted(usable["wave"].unique()):
+                test = usable[(usable["wave"] == wave) & (usable["gender"] == code)]
+                if test.empty:
+                    continue
+                pool = sample[(sample["wave"] != wave) & (sample["gender"] == code)]
+                prior = fit_clogit(make_strata(pool, columns))
+                for chooser, group in test.groupby("iid"):
+                    y = group["dec"].to_numpy(float)
+                    if not 0 < y.sum() < len(y):
+                        continue
+                    raw = group[columns].to_numpy(float)
+                    x = np.ascontiguousarray((raw - prior.mean) / prior.sd)
+                    stated = np.ascontiguousarray(raw @ group[STATED].iloc[0].to_numpy(float))
+                    base = dict(version=version, iid=chooser, dates=len(y))
+                    for shrink, line in ((lam, "Personal revealed"),
+                                         (1e-2, "Personal revealed, unshrunk")):
+                        for n in grid:
+                            auc = learning_draws(x, y, stated, prior.beta, shrink, n,
+                                                 LEARNING_TEST, draws, int(chooser) * 1000)
+                            mean = np.nanmean(auc, axis=0)
+                            rows.append(dict(base, line=line, n=n, auc=mean[0]))
+                            if line == "Personal revealed":
+                                rows.append(dict(base, line="Stated (their survey)", n=n,
+                                                 auc=mean[1]))
+                                rows.append(dict(base, line="Pooled revealed (everyone)", n=n,
+                                                 auc=mean[2]))
+    return pd.DataFrame(rows)
+
+
+def a5m_learning_curve(ctx):
+    """A5m: does a person's own revealed taste overtake their survey with more dates?"""
+    people = learning_curve_frame(ctx)
+    curve_rows, projection_rows, finding_rows = [], [], []
+    for version, frame in people.groupby("version", sort=False):
+        frame = frame.dropna(subset=["auc"])
+        ids = sorted(set(frame["iid"]))
+        for line, part in frame.groupby("line", sort=False):
+            for n, cell in part.groupby("n"):
+                cell = cell.set_index("iid")["auc"]
+                stated_n = frame[(frame["line"] == "Stated (their survey)") & (frame["n"] == n)]
+                level = boot_mean(cell.to_numpy(), ctx.n_boot)
+                gap = boot_mean((cell - stated_n.set_index("iid")["auc"].reindex(cell.index))
+                                .dropna().to_numpy() * 100, ctx.n_boot)
+                curve_rows.append(dict(version=version, line=line, n=int(n),
+                                       auc=cell.mean(), ci_low=level["ci_low"],
+                                       ci_high=level["ci_high"], minus_stated_pp=gap["estimate"],
+                                       gap_ci_low=gap["ci_low"], gap_ci_high=gap["ci_high"],
+                                       gap_p=gap["p"], people=len(cell)))
+        curve = pd.DataFrame([r for r in curve_rows if r["version"] == version])
+        line = lambda name: curve[curve["line"] == name].sort_values("n")
+        personal, raw = line("Personal revealed"), line("Personal revealed, unshrunk")
+        stated = line("Stated (their survey)")["auc"].iloc[0]
+        pooled_row = line("Pooled revealed (everyone)").iloc[0]
+        # Linear trend of the unshrunk curve: where would it reach the survey?
+        slope = np.polyfit(raw["n"], raw["auc"], 1)[0]
+        reach = (raw["n"].iloc[-1] + (stated - raw["auc"].iloc[-1]) / slope
+                 if slope > 0 and raw["auc"].iloc[-1] < stated else np.nan)
+        projection_rows.append(dict(
+            version=version, stated_auc=stated, pooled_auc=pooled_row.auc,
+            pooled_minus_stated_pp=pooled_row.minus_stated_pp,
+            personal_auc_first=personal["auc"].iloc[0], personal_auc_last=personal["auc"].iloc[-1],
+            unshrunk_auc_first=raw["auc"].iloc[0], unshrunk_auc_last=raw["auc"].iloc[-1],
+            unshrunk_gain_per_date=slope, unshrunk_reaches_survey_at_dates=reach,
+            max_training_dates=int(raw["n"].iloc[-1]), people=len(ids)))
+        first, last = personal.iloc[0], personal.iloc[-1]
+        finding_rows.append(finding(
+            "A5m" + ("a" if version.startswith("Pre") else "b"),
+            f"{version}: everyone's revealed weights predict a person's own held-out choices better "
+            f"than that person's survey (AUC {pooled_row.auc:.2f} vs {stated:.2f}). Weights learned "
+            f"from the person's own dates do not catch up within {int(last.n)} dates: shrunk, they "
+            f"slide from {first.auc:.2f} (near pooled) to {last.auc:.2f}; unshrunk they stay at "
+            f"{raw['auc'].iloc[0]:.2f}-{raw['auc'].max():.2f}",
+            pooled_row.minus_stated_pp, (pooled_row.gap_ci_low, pooled_row.gap_ci_high),
+            pooled_row.gap_p, "AUC pts, pooled revealed minus own survey", f"{len(ids)} people",
+            "a5_learning_curve"))
+    return dict(tables=dict(a5_learning_curve=pd.DataFrame(curve_rows),
+                            a5_learning_projection=pd.DataFrame(projection_rows)),
+                rows=finding_rows)
+
+
+PARTNER_GRID = (2, 4, 6, 8, 10, 12)
+
+
+def a5n_partner_learning(ctx, seeds=SEEDS[:3], draws=3, grid=PARTNER_GRID):
+    """A5n: does B2 (partner's revealed taste) catch B1 (stated) with more of their dates?
+
+    Model A stays pooled. B2 learns each partner's weights from n of their
+    other dates (never the date with this chooser). Outcome: top-3 match
+    rate, averaged per person over splits and draws, compared with B1 on the
+    same people. "Full-data" lists are those whose median partner has more
+    than max(grid) dates, so n is a real n for most partners on the list (a
+    stricter "every partner" rule leaves about 20 people).
+    """
+    person, auc_rows = {}, []
+
+    def collect(key, scored):
+        top = top_k(scored, "reciprocal", 3)["match"]
+        person.setdefault(key, []).append(top)
+        auc_rows.append(dict(key=key, auc=_within_person(scored, "partner_only", "dec_o",
+                                                         roc_auc_score).mean()))
+        return scored
+
+    for seed in seeds:
+        base = collect(("B0", None, None), ranking_frame(ctx, seed, "full"))
+        collect(("B1", None, None), ranking_frame(ctx, seed, "mirror_stated"))
+        for lam in (1.0, 0.3):
+            for n in grid:
+                for draw in range(draws):
+                    collect(("B2", lam, n), ranking_frame(ctx, seed, "mirror_revealed", lam=lam,
+                                                          partner_n=n, draw=draw))
+    dates = base.groupby("iid").size()
+    full = base.groupby("iid")["pid"].agg(lambda p: dates.reindex(p).fillna(0).median() > max(grid))
+    full_ids = full[full].index
+    means = {key: pd.concat(values, axis=1).mean(axis=1) for key, values in person.items()}
+    auc = pd.DataFrame(auc_rows).groupby("key")["auc"].mean()
+    rows = []
+    for subset, ids in (("All lists", means[("B0", None, None)].index), ("Full-data lists", full_ids)):
+        b1 = means[("B1", None, None)].reindex(ids)
+        for key, values in means.items():
+            values = values.reindex(ids)
+            gap = boot_mean((values - b1).to_numpy() * 100, ctx.n_boot)
+            label = ({"B0": "Current B", "B1": "B1: stated fit"}[key[0]] if key[0] != "B2"
+                     else f"B2: revealed fit, shrinkage {key[1]:g}")
+            rows.append(dict(subset=subset, model=label, partner_dates=key[2], lam=key[1],
+                             top3_match=values.mean(), minus_b1_pp=gap["estimate"],
+                             ci_low=gap["ci_low"], ci_high=gap["ci_high"], p=gap["p"],
+                             partner_yes_auc=auc[key], people=len(ids)))
+    table = pd.DataFrame(rows)
+    findings = []
+    for subset in ("Full-data lists", "All lists"):
+        part = table[(table["subset"] == subset) & (table["lam"] == 1.0)].sort_values("partner_dates")
+        last = part.iloc[-1]
+        worst = part.loc[part["minus_b1_pp"].idxmin()]
+        findings.append(finding(
+            "A5n" + ("a" if subset.startswith("Full") else "b"),
+            f"{subset}: learning each partner's taste from more of their dates does not catch their "
+            f"survey. B2 minus B1 in top-3 matches is {part['minus_b1_pp'].iloc[0]:+.1f} pp at "
+            f"{int(part['partner_dates'].iloc[0])} dates, {worst.minus_b1_pp:+.1f} at "
+            f"{int(worst.partner_dates)}, {last.minus_b1_pp:+.1f} at {int(last.partner_dates)}: "
+            f"below zero at every n, with no steady trend",
+            last.minus_b1_pp, (last.ci_low, last.ci_high), last.p,
+            f"pp match, top 3, B2 ({int(last.partner_dates)} dates) minus B1",
+            f"{int(last.people)} people", "a5_partner_learning"))
+    return dict(tables=dict(a5_partner_learning=table), rows=findings)
 
 
 # ------------------------------------------------------- S3 market simulator
@@ -997,5 +1286,5 @@ def n6_first_choices(ctx):
     return dict(tables=dict(n6_first_choices=table), rows=rows)
 
 
-ANALYSES = [a3_survey_vs_behaviour, a5_metric, a6_personalisation_limit, s2_contrast,
+ANALYSES = [a3_survey_vs_behaviour, a5_metric, a5l_partner_mirror, a5m_learning_curve, a5n_partner_learning, a6_personalisation_limit, s2_contrast,
             s3_market_simulator, s4_common_ground, n6_first_choices]

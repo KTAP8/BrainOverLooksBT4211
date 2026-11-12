@@ -172,6 +172,102 @@ class KaggleAdaptations(Shared):
         self.assertTrue(np.isfinite(result["tables"]["s4_common_ground_slopes"]["pp_per_sd"]).all())
 
 
+class MirrorModel(Shared):
+    """A5l: model B as the mirror of model A."""
+
+    def test_your_ratings_are_constant_within_your_list(self):
+        """If they varied by partner they could steer the ranking (module rule)."""
+        frame = ef.add_reverse_ratings(self.data)
+        self.assertEqual(frame.groupby("iid")["you_attr"].nunique().max(), 1)
+
+    def test_personal_weights_leave_out_the_partner(self):
+        """Flipping j's decision about i must not move j's weights used for i."""
+        rows = ef.add_split_fold(self.data)
+        rows = rows[(rows["gender"] == 1) & (rows["wave"] == 2)].dropna(subset=ef.SPLIT_FOLD)
+        prior, mean, sd = np.zeros(6), rows[ef.SPLIT_FOLD].mean().to_numpy(), \
+            rows[ef.SPLIT_FOLD].std().to_numpy()
+        first = ef.personal_weights(rows, prior, mean, sd)
+        altered = rows.copy()
+        target = altered.index[0]
+        altered.loc[target, "dec"] = 1 - altered.loc[target, "dec"]
+        second = ef.personal_weights(altered, prior, mean, sd)
+        key = (rows.loc[target, "iid"], rows.loc[target, "pid"])
+        pick = lambda w: w[(w["iid"] == key[0]) & (w["pid"] == key[1])][ef.PERSONAL].to_numpy()
+        np.testing.assert_allclose(pick(first), pick(second))
+        other = (first["iid"] == key[0]) & (first["pid"] != key[1])
+        self.assertFalse(np.allclose(first.loc[other, ef.PERSONAL], second.loc[other, ef.PERSONAL]))
+
+    def test_partner_weights_from_n_dates_leave_out_the_partner(self):
+        """A5n: with n of the partner's dates, the date with you is still excluded
+        and at most n dates are used."""
+        rows = ef.add_split_fold(self.data)
+        rows = rows[(rows["gender"] == 1) & (rows["wave"] == 2)].dropna(subset=ef.SPLIT_FOLD)
+        prior, mean, sd = np.zeros(6), rows[ef.SPLIT_FOLD].mean().to_numpy(), \
+            rows[ef.SPLIT_FOLD].std().to_numpy()
+        first = ef.personal_weights(rows, prior, mean, sd, n=4, seed=1)
+        altered = rows.copy()
+        target = altered.index[0]
+        altered.loc[target, "dec"] = 1 - altered.loc[target, "dec"]
+        second = ef.personal_weights(altered, prior, mean, sd, n=4, seed=1)
+        key = (rows.loc[target, "iid"], rows.loc[target, "pid"])
+        pick = lambda w: w[(w["iid"] == key[0]) & (w["pid"] == key[1])][ef.PERSONAL].to_numpy()
+        np.testing.assert_allclose(pick(first), pick(second))
+        smaller = ef.personal_weights(rows, prior, mean, sd, n=2, seed=1)
+        self.assertFalse(np.allclose(first[ef.PERSONAL], smaller[ef.PERSONAL]))
+
+    def test_shrinkage_pulls_to_the_prior_and_releases_to_the_data(self):
+        rng = np.random.default_rng(8)
+        x = rng.normal(size=(4000, 6))
+        truth = np.array([1.5, -0.5, 0.0, 0.8, 0.0, 0.3])
+        y = (rng.random(4000) < 1 / (1 + np.exp(-(x @ truth)))).astype(float)
+        prior = np.full(6, 0.2)
+        np.testing.assert_allclose(ef._shrunk_logit(x, y, prior, 1e7), prior, atol=1e-3)
+        np.testing.assert_allclose(ef._shrunk_logit(x, y, prior, 1e-6), truth, atol=0.15)
+
+    def test_stated_fit_is_their_weights_times_your_ratings(self):
+        scored = em.ranking_frame(es.Context(self.data, self.sample, 10), mode="mirror_stated")
+        row = scored.iloc[0]
+        ratings = self.data[self.data["pid"] == row["iid"]][list(ATTRS)].mean()
+        expected = sum(np.nan_to_num(row[ef.PARTNER_STATED[a]], nan=16.7) / 100 * ratings[a]
+                       for a in ATTRS)
+        self.assertAlmostEqual(row["fit_stated"], expected, places=6)
+
+
+class LearningCurve(unittest.TestCase):
+    """A5m: weights learned from n dates, scored on a held-out date."""
+
+    def setUp(self):
+        rng = np.random.default_rng(9)
+        self.x = np.ascontiguousarray(rng.normal(size=(16, 6)))
+        self.y = (rng.random(16) < 0.5).astype(float)
+        self.prior = np.full(6, 0.3)
+
+    def test_held_out_decisions_never_train_the_model(self):
+        """Flip every held-out label: if the model never saw them, each AUC
+        becomes exactly 1 - AUC (same scores, reversed labels)."""
+        stated = self.x[:, 0].copy()
+        first = ef.learning_draws(self.x, self.y, stated, self.prior, 1.0, 8, 4, 1, 11)
+        np.random.seed(11)
+        test = np.random.permutation(16)[:4]
+        flipped = self.y.copy()
+        flipped[test] = 1 - flipped[test]
+        second = ef.learning_draws(self.x, flipped, stated, self.prior, 1.0, 8, 4, 1, 11)
+        # Flipping every held-out label reverses each AUC exactly (1 - AUC).
+        np.testing.assert_allclose(second[0], 1 - first[0])
+
+    def test_heavy_shrinkage_matches_the_pooled_weights(self):
+        stated = self.x[:, 0].copy()
+        out = ef.learning_draws(self.x, self.y, stated, self.prior, 1e7, 5, 4, 20, 3)
+        both = ~np.isnan(out[:, 0])
+        np.testing.assert_allclose(out[both, 0], out[both, 2])
+
+    def test_held_out_dates_are_the_same_for_every_n(self):
+        stated = self.x[:, 0].copy()
+        small = ef.learning_draws(self.x, self.y, stated, self.prior, 1.0, 2, 4, 10, 5)
+        large = ef.learning_draws(self.x, self.y, stated, self.prior, 1.0, 10, 4, 10, 5)
+        np.testing.assert_allclose(small[:, 1:], large[:, 1:])
+
+
 class LatentClass(Shared):
     def test_one_class_equals_the_conditional_logit(self):
         strata = ef.make_strata(self.sample[self.sample["gender"] == 0], ATTRS)
