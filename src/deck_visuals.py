@@ -574,10 +574,98 @@ def slide_10_poster():
     save_slide(fig, "10_poster")
 
 
+def arrow(ax, x1, y1, x2, y2, colour=CREAM, lw=3, head=16):
+    """Straight arrow in slide pixels."""
+    import numpy as np
+    ax.plot([x1, x2], [y1, y2], color=colour, linewidth=lw, solid_capstyle="round")
+    angle = np.arctan2(y2 - y1, x2 - x1)
+    left = (x2 - head * np.cos(angle - 0.45), y2 - head * np.sin(angle - 0.45))
+    right = (x2 - head * np.cos(angle + 0.45), y2 - head * np.sin(angle + 0.45))
+    ax.add_patch(Polygon([(x2, y2), left, right], facecolor=colour, edgecolor="none"))
+
+
+def slide_8c_model():
+    """How 'rank for both sides' works. Slot: serif title top-left (108,105).
+    Weights read from core_model_results; the Alex/Ben example is illustrative."""
+    core = table("core_model_results").set_index(["gender", "attribute"])["revealed"]
+    looks = f"{core['Women', 'attr']:.0f}\u2013{core['Men', 'attr']:.0f}"
+    fun = f"{core['Women', 'fun']:.0f}\u2013{core['Men', 'fun']:.0f}"
+    fig, ax = slide()
+    rose = blend(RUST, CREAM, 0.85)
+
+    # inputs
+    card(ax, 60, 290, 400, 470, fill=DEEP, edge=MUTED, lw=1.5, radius=24)
+    ax.text(90, 330, "EACH PROFILE", color=MUTED, fontsize=15, fontweight="bold", va="center")
+    ax.text(90, 365, "known before you meet", color=MUTED, fontsize=13, va="center")
+    inputs = ["How others rated them", "(looks, fun, sincerity\u2026)", "Their yes rate",
+              "Their stated preferences", "Age gap, hobby overlap,", "same race"]
+    ys = [430, 465, 530, 595, 660, 695]
+    bold = {0, 2, 3, 4}
+    for y, text in zip(ys, inputs):
+        ax.text(90, y, text, color=CREAM if inputs.index(text) in bold else MUTED, fontsize=17, va="center")
+
+    # model A and B
+    for top, colour, tag, question, lines, learns in (
+            (270, SAND, "A", "Will YOU say yes?",
+             ["Fixed-effects logit on everyone's yeses vs noes, + pair facts",
+              f"same method as Jiayi's weights (looks {looks}, fun {fun})"],
+             "learns from: did you say yes"),
+            (540, rose, "B", "Will THEY say yes?",
+             ["Logistic regression on their yes rate,",
+              "stated preferences, age gap, hobbies"],
+             "learns from: did they say yes to you")):
+        card(ax, 580, top, 640, 230, fill=DEEP, edge=colour, lw=2.5, radius=24)
+        ax.add_patch(Circle((630, top + 52), 28, facecolor=colour, edgecolor="none"))
+        ax.text(630, top + 53, tag, color=MAROON, fontsize=22, fontweight="bold", ha="center", va="center")
+        ax.text(678, top + 52, question, color=CREAM, fontsize=24, fontweight="bold", va="center")
+        ax.text(610, top + 115, lines[0], color=CREAM, fontsize=15, va="center")
+        ax.text(610, top + 148, lines[1], color=CREAM, fontsize=15, va="center")
+        ax.text(610, top + 195, learns, color=colour, fontsize=14, fontstyle="italic", va="center")
+    arrow(ax, 470, 470, 570, 390)
+    arrow(ax, 470, 580, 570, 650)
+
+    # combine
+    arrow(ax, 1230, 385, 1320, 480, colour=ORANGE, lw=4)
+    arrow(ax, 1230, 655, 1320, 560, colour=ORANGE, lw=4)
+    card(ax, 1330, 430, 260, 180, fill=ORANGE, edge=CREAM, lw=3, radius=28)
+    ax.text(1460, 490, "P(A) \u00d7 P(B)", color=MAROON, fontsize=26, fontweight="bold", ha="center", va="center")
+    ax.text(1460, 548, "chance of a match", color=MAROON, fontsize=16, ha="center", va="center")
+
+    # sort -> top 3
+    arrow(ax, 1600, 520, 1660, 520, colour=ORANGE, lw=4)
+    ax.text(1630, 488, "sort", color=MUTED, fontsize=13, ha="center", va="center")
+    for i in range(3):
+        y = 400 + i * 85
+        card(ax, 1680, y, 200, 68, fill=DEEP if i else ORANGE, edge=CREAM, lw=1.5, radius=16)
+        ax.add_patch(Circle((1718, y + 34), 18, facecolor=CREAM if i else MAROON, edgecolor="none"))
+        ax.text(1718, y + 35, str(i + 1), color=MAROON if i else CREAM, fontsize=15, fontweight="bold",
+                ha="center", va="center")
+        ax.plot([1750, 1855], [y + 27, y + 27], color=CREAM if i else MAROON, linewidth=5, alpha=0.6,
+                solid_capstyle="round")
+        ax.plot([1750, 1820], [y + 45, y + 45], color=CREAM if i else MAROON, linewidth=5, alpha=0.35,
+                solid_capstyle="round")
+    ax.text(1780, 375, "TOP 3 SHOWN", color=MUTED, fontsize=14, fontweight="bold", ha="center", va="center")
+
+    # worked example
+    card(ax, 60, 820, 1820, 140, fill=DEEP, edge="none", lw=0, radius=22)
+    ax.text(95, 858, "EXAMPLE (ILLUSTRATIVE)", color=MUTED, fontsize=13, fontweight="bold", va="center")
+    ax.text(95, 912, "Alex", color=CREAM, fontsize=20, fontweight="bold", va="center")
+    ax.text(185, 912, f"0.90 \u00d7 0.20 = 0.18   {ARROW} #2", color=CREAM, fontsize=20, va="center")
+    ax.text(640, 912, "Ben", color=ORANGE, fontsize=20, fontweight="bold", va="center")
+    ax.text(720, 912, f"0.70 \u00d7 0.60 = 0.42   {ARROW} #1", color=ORANGE, fontsize=20, fontweight="bold",
+            va="center")
+    ax.text(1180, 912, "You like Alex more, but Ben likes you back.", color=MUTED, fontsize=17,
+            fontstyle="italic", va="center")
+    ax.text(60, 1035, "Pre-date info only  \u00b7  trained on 20 events, tested on the 21st (\u00d721)  \u00b7  "
+            "men and women modelled separately  \u00b7  judged on real matches in each top 3",
+            color=MUTED, fontsize=14, va="center")
+    save_slide(fig, "8c_model")
+
+
 def main():
     FIGURES.mkdir(parents=True, exist_ok=True)
     for build in (ranking_donut, twist_phones, match_bars, survey_vs_dates, revenue_chain,
-                  decision_tiles, slide_8a_ring, slide_8b_faceoff, slide_8c0_wasted, slide_8c_race, slide_8d_seesaw,
+                  decision_tiles, slide_8a_ring, slide_8b_faceoff, slide_8c0_wasted, slide_8c_model, slide_8c_race, slide_8d_seesaw,
                   slide_9_flywheel, slide_10_poster):
         build()
     print("Wrote outputs/figures/deck_*.png")
