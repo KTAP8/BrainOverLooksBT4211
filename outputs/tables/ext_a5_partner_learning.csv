@@ -1,0 +1,29 @@
+subset,model,partner_dates,lam,top3_match,minus_b1_pp,ci_low,ci_high,p,partner_yes_auc,people
+All lists,Current B,,,0.326819,-1.155359,-1.843658,-0.46706,0.003,0.735722,452
+All lists,B1: stated fit,,,0.338373,0.0,0.0,0.0,1.0,0.740823,452
+All lists,"B2: revealed fit, shrinkage 1",2.0,1.0,0.333784,-0.458866,-1.09841,0.205056,0.189,0.729092,452
+All lists,"B2: revealed fit, shrinkage 1",4.0,1.0,0.325098,-1.327434,-2.08149,-0.516019,0.001,0.72145,452
+All lists,"B2: revealed fit, shrinkage 1",6.0,1.0,0.328458,-0.991478,-1.778106,-0.172075,0.023,0.720755,452
+All lists,"B2: revealed fit, shrinkage 1",8.0,1.0,0.332719,-0.565388,-1.376598,0.319772,0.219,0.722665,452
+All lists,"B2: revealed fit, shrinkage 1",10.0,1.0,0.329359,-0.901344,-1.679777,-0.016388,0.047,0.720719,452
+All lists,"B2: revealed fit, shrinkage 1",12.0,1.0,0.328786,-0.958702,-1.852057,-0.04097,0.033,0.72146,452
+All lists,"B2: revealed fit, shrinkage 0.3",2.0,0.3,0.329523,-0.884956,-1.557071,-0.213045,0.013,0.721955,452
+All lists,"B2: revealed fit, shrinkage 0.3",4.0,0.3,0.323378,-1.499508,-2.212594,-0.745043,0.001,0.720241,452
+All lists,"B2: revealed fit, shrinkage 0.3",6.0,0.3,0.32854,-0.983284,-1.729146,-0.172075,0.015,0.723134,452
+All lists,"B2: revealed fit, shrinkage 0.3",8.0,0.3,0.330998,-0.737463,-1.466732,0.098533,0.093,0.727614,452
+All lists,"B2: revealed fit, shrinkage 0.3",10.0,0.3,0.329277,-0.909538,-1.598656,-0.057153,0.031,0.726459,452
+All lists,"B2: revealed fit, shrinkage 0.3",12.0,0.3,0.330998,-0.737463,-1.507907,0.073951,0.081,0.726293,452
+Full-data lists,Current B,,,0.334375,-1.25,-2.152778,-0.381944,0.003,0.735722,320
+Full-data lists,B1: stated fit,,,0.346875,0.0,0.0,0.0,1.0,0.740823,320
+Full-data lists,"B2: revealed fit, shrinkage 1",2.0,1.0,0.342361,-0.451389,-1.30787,0.405093,0.295,0.729092,320
+Full-data lists,"B2: revealed fit, shrinkage 1",4.0,1.0,0.33206,-1.481481,-2.476852,-0.45081,0.005,0.72145,320
+Full-data lists,"B2: revealed fit, shrinkage 1",6.0,1.0,0.336227,-1.064815,-2.095197,0.000289,0.057,0.720755,320
+Full-data lists,"B2: revealed fit, shrinkage 1",8.0,1.0,0.345255,-0.162037,-1.226852,0.960938,0.803,0.722665,320
+Full-data lists,"B2: revealed fit, shrinkage 1",10.0,1.0,0.340856,-0.601852,-1.782697,0.625289,0.323,0.720719,320
+Full-data lists,"B2: revealed fit, shrinkage 1",12.0,1.0,0.339699,-0.717593,-1.944444,0.532407,0.265,0.72146,320
+Full-data lists,"B2: revealed fit, shrinkage 0.3",2.0,0.3,0.337384,-0.949074,-1.863426,-0.022859,0.047,0.721955,320
+Full-data lists,"B2: revealed fit, shrinkage 0.3",4.0,0.3,0.330324,-1.655093,-2.604456,-0.706019,0.001,0.720241,320
+Full-data lists,"B2: revealed fit, shrinkage 0.3",6.0,0.3,0.337616,-0.925926,-1.967882,0.069734,0.067,0.723134,320
+Full-data lists,"B2: revealed fit, shrinkage 0.3",8.0,0.3,0.341898,-0.497685,-1.481771,0.521123,0.375,0.727614,320
+Full-data lists,"B2: revealed fit, shrinkage 0.3",10.0,0.3,0.339583,-0.729167,-1.770833,0.3125,0.189,0.726459,320
+Full-data lists,"B2: revealed fit, shrinkage 0.3",12.0,0.3,0.341551,-0.532407,-1.655093,0.521123,0.355,0.726293,320
