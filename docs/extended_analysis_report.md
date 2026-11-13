@@ -230,6 +230,37 @@ Model A asks "do they have what *you* value?" (their traits as others rated them
 
 **Files:** `ext_a5_partner_learning.csv`. **Figure:** `ext_a5_partner_learning.png`.
 
+**A5o. One model for both sides (final rule used in the deck)**
+
+**Why:** in A5 the two sides use different taste sources. Model A uses everyone's revealed weights; model B uses the partner's survey (B0) or their stated weights × your ratings (B1). Judging the same person's taste two ways is inconsistent.
+
+**Setup** (`src/ext_same_model.py`, same unseen-event replay as A5, top 3, 5 split seeds):
+- **Your side:** model A unchanged.
+- **Their side:** the same model A, fitted for the partner's gender on the other events, applied to the reverse row (the partner as chooser, you as the one rated).
+- **Leak guard:** the partner's yes rate is leave-one-out, so it never contains their decision about you. Without this guard the rule scored 36-37%, which was leakage and is discarded.
+- **Comparisons:** B0 (the A5 headline, reproduced exactly from `ext_a5_seed_sensitivity.csv`) and "both shared" (shared weights on both sides; the shared fit is constant within your list, so B keeps only their yes rate + pair facts).
+
+**Results (top-3 match rate):**
+
+| Split | B0 (A5 headline) | Both shared | Same model both ways |
+|---|---|---|---|
+| 42 | 34.0% | 33.4% | 34.6% |
+| 7 | 32.3% | 32.4% | 33.4% |
+| 123 | 31.8% | 32.1% | 34.0% |
+| 2024 | 32.3% | 32.4% | 33.1% |
+| 99 | 31.2% | 31.1% | 33.7% |
+
+- **Same model vs B0:** +0.6 to +2.5 pp; the person-bootstrap CI excludes zero on 2 of 5 splits (123, 99).
+- **Same model vs both shared:** +0.7 to +2.6 pp; clear on the same 2 splits.
+- **Cost:** your yes rate in the top 3 is 58-59% vs 60-62% for B0 (65% for survey weights).
+- **Both shared ≈ B0** (−0.5 to +0.3 pp): the partner's stated weights in B0 added nothing.
+
+**Reading:** one model, applied to both people, is consistent and at least as good as the mixed rules. Use it as the headline: 35% on the main split, 33-35% across splits, vs 27% for survey weights.
+
+**Limits:** your side still uses your yes rate from the test event (as in A5); it is constant within your list, so it only sets how much your side weighs against theirs. The partner's leave-one-out rate still uses their other dates that night, the same kind of input as `j_sel` in B0.
+
+**Files:** `ext_a5_same_model.csv`. **Figures:** `deck_full_8c_model_final.png`, `deck_full_8c_race_final.png` (`src/deck_final_8c.py`). **Tests:** `tests/test_same_model.py`.
+
 - **Files:** `ext_a5_ranking.csv`, `ext_a5_lifts.csv`, `ext_a5_seed_sensitivity.csv`, `ext_a5_history_design.csv`, `ext_a5_partner_model.csv`, `ext_a5_who_benefits.csv`, `ext_a5_exposure.csv`, `ext_a5_funnel.csv`, `ext_a5_endings.csv`, `ext_a5_direct_vs_two_sided.csv`, `ext_a5_rank_quality.csv`, `ext_a5_partner_mirror.csv`, `ext_a5_learning_curve.csv`, `ext_a5_learning_projection.csv`.
 
 ### A6. How much can personalisation do?
@@ -381,6 +412,8 @@ Reading the summary: `A` is core, `S` supporting, `R` robustness, `N` not recomm
 | `src/ext_features.py` | Shared sample, features, model fitting and statistics. **Read its opening note before changing a ranking feature** |
 | `src/ext_survey.py` | A1, A2, A4, S1, R1 to R6, N1 to N5, N8, N9 |
 | `src/ext_market.py` | A3, A5 (including A5j to A5n), A6, S2, S3, S4, N6, N7 |
+| `src/ext_same_model.py` | A5o (standalone; run after the extended analyses) |
+| `src/deck_final_8c.py` | Final "rank for both sides" slide images from A5o |
 | `src/ext_figures.py` | All charts |
 | `src/extended_analysis.py` | Runner, summary table, tiers and question wording |
 | `tests/test_extended.py` | 31 checks on the sample, leakage, placebo, matching, endings, the direct match model, S4 bands, the mirrored partner model and the learning curve |
